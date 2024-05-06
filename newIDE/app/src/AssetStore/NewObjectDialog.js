@@ -253,6 +253,10 @@ function NewObjectDialog({
     async nft => {
       if (!nft) return false;
 
+
+      onCreateNewObject("Sprite")
+      return
+
       // const assets = [{
       //   name: nft.name,
       //   tokenId: nft.tokenId,
@@ -286,6 +290,7 @@ function NewObjectDialog({
                 variables: [],
                 effects: [],
                 behaviors: [],
+                customization: [],
                 animations: [
                   {
                     name: '',
@@ -337,7 +342,7 @@ function NewObjectDialog({
                   },
                 ],
               },
-              customization: [],
+             
               requiredExtensions: [],
               resources: [
                 {
@@ -403,8 +408,8 @@ function NewObjectDialog({
         sendAssetAddedToProject({
           id: asset.id,
           name: asset.name,
-          assetPackName: asset.name,
-          assetPackTag: asset.tags[0],
+          assetPackName: null,
+          assetPackTag: null,
           assetPackId: null,
           assetPackKind: 'public',
         });
@@ -450,11 +455,6 @@ function NewObjectDialog({
           }
         }
         const assets = await fetchAssets([assetShortHeader]);
-
-        console.log(
-          '\n\n\n\n\\n%s\n\n\n\n\n',
-          JSON.stringify({ assets }, null, 2)
-        );
 
         console.log('assets in new dialog: ', assets);
         const asset = assets[0];

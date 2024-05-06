@@ -302,7 +302,7 @@ const ObjectsList = React.forwardRef<Props, ObjectsListInterface>(
     const [searchText, setSearchText] = React.useState('');
 
     const addObject = React.useCallback(
-      (objectType: string) => {
+      (objectType: string, nftUrl: ?string) => {
         const defaultName = project.hasEventsBasedObject(objectType)
           ? 'New' + project.getEventsBasedObject(objectType).getDefaultName()
           : objectTypeToDefaultName[objectType] || 'NewObject';

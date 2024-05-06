@@ -165,7 +165,7 @@ export const NFTProvider = ({ children }) => {
     setIsLoadingNFT(false);
 
     const provider = new ethers.JsonRpcProvider(
-      'https://eth-sepolia.g.alchemy.com/v2/0Hy758w6BteirxoloAs_K_vgQhMZuCIc'
+      'http://127.0.0.1:8545/'
     );
     const contract = fetchContract(provider);
 
@@ -328,7 +328,7 @@ export const NFTProvider = ({ children }) => {
     const connection = await web3Modal.connect();
     console.log('connection ====>', connection);
     // const provider = new ethers.JsonRpcProvider(
-    //   'https://eth-sepolia.g.alchemy.com/v2/0Hy758w6BteirxoloAs_K_vgQhMZuCIc'
+    //   'http://127.0.0.1:8545/'
     // );
     const provider = new ethers.BrowserProvider(window.ethereum);
     const signer = await provider.getSigner();
