@@ -673,6 +673,10 @@ export const AssetStore = React.forwardRef<Props, AssetStoreInterface>(
         >
           {isOnHomePage ? (
             storeError ? (
+              console.error(
+                'An error occurred when fetching the store content. Please try again later.'
+              )
+            ) : /* (
               <PlaceholderError onRetry={fetchAssetsAndGameTemplates}>
                 <AlertMessage kind="error">
                   <Trans>
@@ -681,7 +685,9 @@ export const AssetStore = React.forwardRef<Props, AssetStoreInterface>(
                   </Trans>
                 </AlertMessage>
               </PlaceholderError>
-            ) : publicAssetPacks &&
+            ) */
+
+            publicAssetPacks &&
               privateAssetPackListingDatas &&
               privateGameTemplateListingDatas ? (
               <AssetsHome
