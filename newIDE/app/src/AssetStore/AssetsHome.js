@@ -12,7 +12,7 @@ import {
   type PrivateAssetPackListingData,
   type PrivateGameTemplateListingData,
 } from '../Utils/GDevelopServices/Shop';
-import { Line, Column } from '../UI/Grid';
+import { Line, Column, Spacer } from '../UI/Grid';
 import ScrollView, { type ScrollViewInterface } from '../UI/ScrollView';
 import {
   useResponsiveWindowSize,
@@ -153,9 +153,9 @@ export type AssetsHomeInterface = {|
 |};
 
 type Props = {|
-  publicAssetPacks: PublicAssetPacks,
-  privateAssetPackListingDatas: Array<PrivateAssetPackListingData>,
-  privateGameTemplateListingDatas: Array<PrivateGameTemplateListingData>,
+  // publicAssetPacks: PublicAssetPacks,
+  // privateAssetPackListingDatas: Array<PrivateAssetPackListingData>,
+  // privateGameTemplateListingDatas: Array<PrivateGameTemplateListingData>,
   onPublicAssetPackSelection: PublicAssetPack => void,
   onPrivateAssetPackSelection: PrivateAssetPackListingData => void,
   onPrivateGameTemplateSelection: PrivateGameTemplateListingData => void,
@@ -168,9 +168,9 @@ type Props = {|
 export const AssetsHome = React.forwardRef<Props, AssetsHomeInterface>(
   (
     {
-      publicAssetPacks: { starterPacks },
-      privateAssetPackListingDatas,
-      privateGameTemplateListingDatas,
+      // publicAssetPacks: { starterPacks },
+      // privateAssetPackListingDatas,
+      // privateGameTemplateListingDatas,
       onPublicAssetPackSelection,
       onPrivateAssetPackSelection,
       onPrivateGameTemplateSelection,
@@ -205,120 +205,120 @@ export const AssetsHome = React.forwardRef<Props, AssetsHomeInterface>(
       },
     }));
 
-    const categoryTiles = React.useMemo(
-      () =>
-        Object.entries(shopCategories).map(
-          // $FlowExpectedError - Object.entries does not infer well the type of the value.
-          ([id, { title, imageSource, imageAlt }]) =>
-            hideGameTemplates && id === 'game-template' ? null : (
-              <CategoryTile
-                // This id would be more appropriate if it was shop-category-...
-                // but it is kept as is to avoid breaking some guided lessons using this
-                // id to add prefabs for instance.
-                id={`asset-pack-category-${id.replace(/\s/g, '-')}`}
-                key={id}
-                imageSource={imageSource}
-                imageAlt={imageAlt}
-                title={title}
-                onSelect={() => {
-                  onCategorySelection(id);
-                }}
-              />
-            )
-        ),
-      [onCategorySelection, hideGameTemplates]
-    );
+    // const categoryTiles = React.useMemo(
+    //   () =>
+    //     Object.entries(shopCategories).map(
+    //       // $FlowExpectedError - Object.entries does not infer well the type of the value.
+    //       ([id, { title, imageSource, imageAlt }]) =>
+    //         hideGameTemplates && id === 'game-template' ? null : (
+    //           <CategoryTile
+    //             // This id would be more appropriate if it was shop-category-...
+    //             // but it is kept as is to avoid breaking some guided lessons using this
+    //             // id to add prefabs for instance.
+    //             id={`asset-pack-category-${id.replace(/\s/g, '-')}`}
+    //             key={id}
+    //             imageSource={imageSource}
+    //             imageAlt={imageAlt}
+    //             title={title}
+    //             onSelect={() => {
+    //               onCategorySelection(id);
+    //             }}
+    //           />
+    //         )
+    //     ),
+    //   [onCategorySelection, hideGameTemplates]
+    // );
 
-    const openedShopCategoryTitle = openedShopCategory
-      ? shopCategories[openedShopCategory].title
-      : null;
+    // const openedShopCategoryTitle = openedShopCategory
+    //   ? shopCategories[openedShopCategory].title
+    //   : null;
 
-    const starterPacksTiles: Array<React.Node> = starterPacks
-      .filter(
-        assetPack =>
-          !openedShopCategory ||
-          assetPack.categories.includes(openedShopCategory)
-      )
-      .map((assetPack, index) => (
-        <PublicAssetPackTile
-          assetPack={assetPack}
-          onSelect={() => onPublicAssetPackSelection(assetPack)}
-          key={`${assetPack.tag}-${index}`}
-        />
-      ));
+    // const starterPacksTiles: Array<React.Node> = starterPacks
+    //   .filter(
+    //     assetPack =>
+    //       !openedShopCategory ||
+    //       assetPack.categories.includes(openedShopCategory)
+    //   )
+    //   .map((assetPack, index) => (
+    //     <PublicAssetPackTile
+    //       assetPack={assetPack}
+    //       onSelect={() => onPublicAssetPackSelection(assetPack)}
+    //       key={`${assetPack.tag}-${index}`}
+    //     />
+    //   ));
 
-    const { allStandAloneTiles, allBundleTiles } = React.useMemo(
-      () => {
-        const privateAssetPackStandAloneTiles: Array<React.Node> = [];
-        const privateOwnedAssetPackStandAloneTiles: Array<React.Node> = [];
-        const privateAssetPackBundleTiles: Array<React.Node> = [];
-        const privateOwnedAssetPackBundleTiles: Array<React.Node> = [];
+    // const { allStandAloneTiles, allBundleTiles } = React.useMemo(
+    //   () => {
+    //     const privateAssetPackStandAloneTiles: Array<React.Node> = [];
+    //     const privateOwnedAssetPackStandAloneTiles: Array<React.Node> = [];
+    //     const privateAssetPackBundleTiles: Array<React.Node> = [];
+    //     const privateOwnedAssetPackBundleTiles: Array<React.Node> = [];
 
-        privateAssetPackListingDatas
-          .filter(
-            assetPackListingData =>
-              !openedShopCategory ||
-              assetPackListingData.categories.includes(openedShopCategory)
-          )
-          .forEach(assetPackListingData => {
-            const isPackOwned =
-              !!receivedAssetPacks &&
-              !!receivedAssetPacks.find(
-                pack => pack.id === assetPackListingData.id
-              );
-            const tile = (
-              <PrivateAssetPackTile
-                assetPackListingData={assetPackListingData}
-                onSelect={() => {
-                  onPrivateAssetPackSelection(assetPackListingData);
-                }}
-                owned={isPackOwned}
-                key={assetPackListingData.id}
-              />
-            );
-            if (
-              assetPackListingData.includedListableProductIds &&
-              !!assetPackListingData.includedListableProductIds.length
-            ) {
-              if (isPackOwned) {
-                privateOwnedAssetPackBundleTiles.push(tile);
-              } else {
-                privateAssetPackBundleTiles.push(tile);
-              }
-            } else {
-              if (isPackOwned) {
-                privateOwnedAssetPackStandAloneTiles.push(tile);
-              } else {
-                privateAssetPackStandAloneTiles.push(tile);
-              }
-            }
-          });
+    //     privateAssetPackListingDatas
+    //       .filter(
+    //         assetPackListingData =>
+    //           !openedShopCategory ||
+    //           assetPackListingData.categories.includes(openedShopCategory)
+    //       )
+    //       .forEach(assetPackListingData => {
+    //         const isPackOwned =
+    //           !!receivedAssetPacks &&
+    //           !!receivedAssetPacks.find(
+    //             pack => pack.id === assetPackListingData.id
+    //           );
+    //         const tile = (
+    //           <PrivateAssetPackTile
+    //             assetPackListingData={assetPackListingData}
+    //             onSelect={() => {
+    //               onPrivateAssetPackSelection(assetPackListingData);
+    //             }}
+    //             owned={isPackOwned}
+    //             key={assetPackListingData.id}
+    //           />
+    //         );
+    //         if (
+    //           assetPackListingData.includedListableProductIds &&
+    //           !!assetPackListingData.includedListableProductIds.length
+    //         ) {
+    //           if (isPackOwned) {
+    //             privateOwnedAssetPackBundleTiles.push(tile);
+    //           } else {
+    //             privateAssetPackBundleTiles.push(tile);
+    //           }
+    //         } else {
+    //           if (isPackOwned) {
+    //             privateOwnedAssetPackStandAloneTiles.push(tile);
+    //           } else {
+    //             privateAssetPackStandAloneTiles.push(tile);
+    //           }
+    //         }
+    //       });
 
-        const allBundleTiles = [
-          ...privateOwnedAssetPackBundleTiles, // Display owned bundles first.
-          ...privateAssetPackBundleTiles,
-        ];
+    //     const allBundleTiles = [
+    //       ...privateOwnedAssetPackBundleTiles, // Display owned bundles first.
+    //       ...privateAssetPackBundleTiles,
+    //     ];
 
-        const allStandAloneTiles = [
-          ...privateOwnedAssetPackStandAloneTiles, // Display owned packs first.
-          ...mergeArraysPerGroup(
-            privateAssetPackStandAloneTiles,
-            starterPacksTiles,
-            2,
-            1
-          ),
-        ];
+    //     const allStandAloneTiles = [
+    //       ...privateOwnedAssetPackStandAloneTiles, // Display owned packs first.
+    //       ...mergeArraysPerGroup(
+    //         privateAssetPackStandAloneTiles,
+    //         starterPacksTiles,
+    //         2,
+    //         1
+    //       ),
+    //     ];
 
-        return { allStandAloneTiles, allBundleTiles };
-      },
-      [
-        privateAssetPackListingDatas,
-        openedShopCategory,
-        onPrivateAssetPackSelection,
-        starterPacksTiles,
-        receivedAssetPacks,
-      ]
-    );
+    //     return { allStandAloneTiles, allBundleTiles };
+    //   },
+    //   [
+    //     privateAssetPackListingDatas,
+    //     openedShopCategory,
+    //     onPrivateAssetPackSelection,
+    //     starterPacksTiles,
+    //     receivedAssetPacks,
+    //   ]
+    // );
 
     React.useEffect(() => {
       fetchNFTs().then(items => {
@@ -328,45 +328,45 @@ export const AssetsHome = React.forwardRef<Props, AssetsHomeInterface>(
       });
     }, []);
 
-    const gameTemplateTiles = React.useMemo(
-      () => {
-        // Only show game templates if the category is not set or is set to "game-template".
-        return privateGameTemplateListingDatas
-          .filter(
-            privateGameTemplateListingData =>
-              !openedShopCategory || openedShopCategory === 'game-template'
-          )
-          .map((privateGameTemplateListingData, index) => (
-            <PrivateGameTemplateTile
-              privateGameTemplateListingData={privateGameTemplateListingData}
-              onSelect={() => {
-                onPrivateGameTemplateSelection(privateGameTemplateListingData);
-              }}
-              owned={
-                !!receivedGameTemplates &&
-                !!receivedGameTemplates.find(
-                  pack => pack.id === privateGameTemplateListingData.id
-                )
-              }
-              key={privateGameTemplateListingData.id}
-            />
-          ));
-      },
-      [
-        privateGameTemplateListingDatas,
-        openedShopCategory,
-        onPrivateGameTemplateSelection,
-        receivedGameTemplates,
-      ]
-    );
+    // const gameTemplateTiles = React.useMemo(
+    //   () => {
+    //     // Only show game templates if the category is not set or is set to "game-template".
+    //     return privateGameTemplateListingDatas
+    //       .filter(
+    //         privateGameTemplateListingData =>
+    //           !openedShopCategory || openedShopCategory === 'game-template'
+    //       )
+    //       .map((privateGameTemplateListingData, index) => (
+    //         <PrivateGameTemplateTile
+    //           privateGameTemplateListingData={privateGameTemplateListingData}
+    //           onSelect={() => {
+    //             onPrivateGameTemplateSelection(privateGameTemplateListingData);
+    //           }}
+    //           owned={
+    //             !!receivedGameTemplates &&
+    //             !!receivedGameTemplates.find(
+    //               pack => pack.id === privateGameTemplateListingData.id
+    //             )
+    //           }
+    //           key={privateGameTemplateListingData.id}
+    //         />
+    //       ));
+    //   },
+    //   [
+    //     privateGameTemplateListingDatas,
+    //     openedShopCategory,
+    //     onPrivateGameTemplateSelection,
+    //     receivedGameTemplates,
+    //   ]
+    // );
 
-    const {
-      displayedList: displayedStandAloneTiles,
-      onShowMore: onShowMoreStandAloneTiles,
-    } = useProgressiveReveal({
-      list: allStandAloneTiles,
-      numberPerPage: 25,
-    });
+    // const {
+    //   displayedList: displayedStandAloneTiles,
+    //   onShowMore: onShowMoreStandAloneTiles,
+    // } = useProgressiveReveal({
+    //   list: allStandAloneTiles,
+    //   numberPerPage: 25,
+    // });
 
     // Gola-Start
     const { fetchNFTs } = React.useContext(NFTContext);
@@ -382,7 +382,7 @@ export const AssetsHome = React.forwardRef<Props, AssetsHomeInterface>(
         data={{ isFiltered: !!openedShopCategory ? 'true' : 'false' }}
         onScroll={({ remainingScreensToBottom }) => {
           if (remainingScreensToBottom <= 1.5) {
-            onShowMoreStandAloneTiles();
+            // onShowMoreStandAloneTiles();
           }
         }}
       >
