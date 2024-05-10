@@ -1,6 +1,3 @@
-<<<<<<< Updated upstream
-import { useContext, useState, useEffect } from 'react';
-=======
 // import { useContext, useState, useEffect } from 'react';
 // import { GameContext } from '../../../../GameContext/GameContext';
 // import FlatButton from '../../../../UI/FlatButton';
@@ -14,7 +11,7 @@ import { useContext, useState, useEffect } from 'react';
 // const GameCard = ({ nft, onProfilePage }) => {
 //   const { nftCurrency, buyNftWithaccessID, isLoadingNFT } = useContext(GameContext);
 //   const [isBought, setIsBought] = useState(false);
-  
+
 //   const handleBuy = async () => {
 //     await buyNftWithaccessID(nft.accessId, nft.price);
 //     setIsBought(true);
@@ -98,7 +95,6 @@ import { useContext, useState, useEffect } from 'react';
 //     console.log('Clicked Buy button with accessId:', nft.accessId);
 //       const price = ethers.parseUnits(nft.price.toString(), 'ether');
 
-
 //     try {
 //       await buyNftWithaccessID(nft.accessId, price);
 //       setIsBought(true);
@@ -154,52 +150,56 @@ import { useContext, useState, useEffect } from 'react';
 
 // export default GameCard;
 
-
 import React, { useContext, useState, useEffect } from 'react';
->>>>>>> Stashed changes
 import { GameContext } from '../../../../GameContext/GameContext';
 import FlatButton from '../../../../UI/FlatButton';
 import { Trans } from '@lingui/macro';
 import Loader from './Loader';
 import './NFTCard.css';
+import { ethers } from 'ethers';
 
 const shortenAddress = address =>
   `${address.slice(0, 5)}...${address.slice(address.length - 4)}`;
 
-const GameCard = ({ nft, onProfilePage }) => {
-  const { nftCurrency, buyNFT, isLoadingNFT } = useContext(GameContext);
+const GameCard = ({ nft }) => {
+  const { nftCurrency, isLoadingNFT, buyNftWithaccessID } = useContext(
+    GameContext
+  );
   const [isBought, setIsBought] = useState(false);
   const external_urls = 'https://gateway.pinata.cloud/';
 
-  useEffect(
-    () => {
-      const checkIfBought = async () => {
-        const isNFTBought = await checkNFTBought(nft.id);
-        setIsBought(isNFTBought);
-      };
+  // useEffect(
+  //   () => {
+  //     const checkIfBought = async () => {
+  //       const isNFTBought = await checkNFTBought(nft.id);
+  //       setIsBought(isNFTBought);
+  //     };
 
-      checkIfBought();
-    },
-    [nft.id]
-  );
+  //     checkIfBought();
+  //   },
+  //   [nft.id]
+  // );
 
   const handleBuy = async () => {
-    await buyNFT(nft);
-    setIsBought(true);
+    console.log('Clicked Buy button with accessId:', nft.accessId);
+    const price = ethers.parseUnits(nft.price.toString(), 'ether');
+
+    try {
+      await buyNftWithaccessID(nft.accessId, price);
+      setIsBought(true);
+    } catch (error) {
+      console.error('Error buying NFT:', error);
+    }
   };
 
   const handlePlay = () => {
-    // i haveve to redirect to the play section
+    // Open the preview of the game using the zip url, download the zip and use it to open the game
   };
 
   return (
     <div className="nft-card">
       <div className="image-container">
-        <img
-          src={external_urls + nft.image}
-          className="image"
-          alt={`nft${nft.i}`}
-        />
+        <img src={nft.imageURL} className="image" alt={`nft${nft.i}`} />
       </div>
       <div className="details">
         <p className="name">{nft.name}</p>
@@ -208,13 +208,13 @@ const GameCard = ({ nft, onProfilePage }) => {
             {nft.price} <span className="currency">{nftCurrency}</span>
           </p>
           <p className="address">
-            {shortenAddress(onProfilePage ? nft.owner : nft.seller)}
+            {shortenAddress(nft.isBought ? nft.owner : nft.seller)}
           </p>
         </div>
       </div>
       <div className="price">
         {/* Conditionally render button based on NFT ownership */}
-        {isBought ? (
+        {nft.isBought ? (
           <FlatButton label={<Trans>Play</Trans>} onClick={handlePlay} />
         ) : (
           <FlatButton label={<Trans>Buy</Trans>} onClick={handleBuy} />
@@ -233,5 +233,3 @@ const GameCard = ({ nft, onProfilePage }) => {
 };
 
 export default GameCard;
-
-

@@ -9,6 +9,9 @@ import { useResponsiveWindowSize } from '../../../UI/Responsive/ResponsiveWindow
 import RaisedButton from '../../../UI/RaisedButton';
 import Add from '../../../UI/CustomSvgIcons/Add';
 import GameNft from '../../../pages/game-nft';
+import { GameContext } from '../../../GameContext/GameContext';
+import GameCard from './BuildSection/GameCard';
+import { Grid, GridList } from '@material-ui/core';
 
 const styles = {
   iframe: {
@@ -22,7 +25,12 @@ const PlaySection = () => {
   const [iframeHeight, setIframeHeight] = React.useState(null);
   const [showGameForm, setShowGameForm] = React.useState(false); // Add state for showing CreateNFT
   const { windowSize, isMobile, isLandscape } = useResponsiveWindowSize();
-  
+
+  const { testing } = React.useContext(GameContext);
+  const [nfts, setNfts] = React.useState([]);
+  const [nftsCopy, setNftsCopy] = React.useState([]);
+  const [isLoading, setIsLoading] = React.useState(true);
+
   window.addEventListener('message', event => {
     if (
       event.origin === 'https://gd.games' &&
@@ -32,22 +40,26 @@ const PlaySection = () => {
     }
   });
 
+  React.useEffect(() => {
+    testing().then(items => {
+      setNfts(items);
+      setNftsCopy(items);
+      setIsLoading(false);
+    });
+  }, []);
+
   return (
     <SectionContainer
       title={<Trans>Play!</Trans>}
       flexBody
       subtitleText={<Trans>Explore games made by others</Trans>}
     >
-               {/* Render RaisedButton conditionally */}
-               <RaisedButton
+      {/* Render RaisedButton conditionally */}
+      <RaisedButton
         primary
-        fullWidth= {false}
+        fullWidth={false}
         label={
-          isMobile ? (
-            <Trans>Publish</Trans>
-          ) : (
-            <Trans>Publish a Game</Trans>
-          )
+          isMobile ? <Trans>Publish</Trans> : <Trans>Publish a Game</Trans>
         }
         onClick={() => {
           showGameForm ? setShowGameForm(false) : setShowGameForm(true);
@@ -56,16 +68,21 @@ const PlaySection = () => {
         id="play-publish-game-button"
       />
       {/* Render CreateNFT conditionally */}
-      {showGameForm && <GameNft/>}
-      {/* <SectionRow expand>
-        <iframe
-          src={`https://gd.games/embedded/${paletteType}`}
+      {showGameForm && <GameNft />}
+      <SectionRow expand>
+        {/* <iframe
+          src={'https://gd.games'}
           title="gdgames"
           style={{ ...styles.iframe, height: iframeHeight }}
           scrolling="no" // This is deprecated, but this is the only way to disable the scrollbar.
-        />
-        {!iframeHeight && <PlaceHolderLoader />}
-      </SectionRow> */}
+        /> */}
+        <GridList>
+          {nfts.map(nft => (
+            <GameCard key={nft.tokenId} nft={nft} />
+          ))}
+        </GridList>
+        {/* {!iframeHeight && <PlaceHolderLoader />} */}
+      </SectionRow>
     </SectionContainer>
   );
 };

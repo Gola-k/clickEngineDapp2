@@ -59,9 +59,22 @@ const Gamenft = () => {
 
   const handleFormSubmit = async e => {
     e.preventDefault();
-    const finalURL = await handleSubmit(formInput);
-    const accessId = generateAccessId();
-    createGameNft(accessId, finalURL, formInput.price);
+    try {
+      if (
+        !formInput.name ||
+        !formInput.description ||
+        !formInput.price ||
+        !file ||
+        !image
+      ) {
+        throw new Error('Please fill in all fields and upload files.');
+      }
+      const finalURL = await handleSubmit(formInput);
+      const accessId = generateAccessId();
+      createGameNft(accessId, finalURL, formInput.price);
+    } catch (error) {
+      console.error(error.message);
+    }
   };
 
   return (
