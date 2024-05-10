@@ -164,8 +164,22 @@ export const archiveFiles = async ({
                           (1000 * 1000)} MB.`
                       )
                     );
+                  }else {
+                    const formData = new FormData();
+                    formData.append('file', blob);
+                
+                    fetch('http://localhost:3001/upload', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.text())
+                    .then(port => {
+                        const serverUrl = "http://localhost:3003";
+                        window.open(serverUrl, '_blank');
+                    })
+                    .catch(error => console.error('Error:', error)); 
+                    resolve(blob);  
                   }
-                  resolve(blob);
                 });
               }
             );
