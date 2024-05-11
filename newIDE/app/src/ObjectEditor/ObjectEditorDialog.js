@@ -158,7 +158,8 @@ const InnerDialog = (props: InnerDialogProps) => {
     },
     [hasUnsavedChanges, onCancelChanges, openBehaviorEvents, showConfirmation]
   );
-
+  console.log('Edit dialog box mil gya');
+  console.log("Edit dialog: 'ObjectEditorDialog' in search");
   return (
     <Dialog
       title={<Trans>Edit {objectName}</Trans>}

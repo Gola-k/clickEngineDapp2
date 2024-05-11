@@ -25,6 +25,8 @@ import {
   type AssetShortHeader,
   getPublicAsset,
   isPrivateAsset,
+  isPublicAssetResourceUrl,
+  extractDecodedFilenameWithExtensionFromPublicAssetResourceUrl,
 } from '../Utils/GDevelopServices/Asset';
 import { type ExtensionShortHeader } from '../Utils/GDevelopServices/Extension';
 import EventsFunctionsExtensionsContext from '../EventsFunctionsExtensionsLoader/EventsFunctionsExtensionsContext';
@@ -40,9 +42,28 @@ import ErrorBoundary from '../UI/ErrorBoundary';
 import NFTCard from '../MainFrame/EditorContainers/HomePage/BuildSection/NFTCard.jsx';
 import { NFTContext } from '../context/NFTContext';
 import { useState, useEffect } from 'react';
-import NFTDetailPage from './NFTDetailPage.jsx';
+import { action } from '@storybook/addon-actions';
+import NFTDetailPage from './NFTDetailPage.js';
+import {
+  type ChooseResourceOptions,
+  type ResourceSourceComponentProps,
+  type ResourceSource,
+  allResourceKindsAndMetadata,
+} from '../ResourcesList/ResourceSource';
+import { ResourceStore } from './ResourceStore/index.js';
+import path from 'path-browserify';
+import { useDebounce } from '../Utils/UseDebounce.js';
+import Axios from 'axios';
+import { type NFTDetailHeader } from './NFTDetailPage.js';
 
+const gd: libGDevelop = global.gd;
 const isDev = Window.isDev();
+
+type ResourceStoreChooserProps = {
+  options: ChooseResourceOptions,
+  onChooseResources: (resources: Array<gdResource>) => void,
+  createNewResource: () => gdResource,
+};
 
 export const useExtensionUpdateAlertDialog = () => {
   const { showConfirmation } = useAlertDialog();
@@ -151,7 +172,18 @@ function NewObjectDialog({
   const [myNFTs, setMyNFTs] = useState([]);
   const [fetchMyNFTsClicked, setFetchMyNFTsClicked] = useState(false);
   const [fetchMyNFTsError, setFetchMyNFTsError] = useState(null);
-  const [selectedNFT, setSelectedNFT] = useState(null);
+
+  const dummydata: NFTDetailHeader = {
+    name: 'dummy',
+    description: 'dummy',
+    image: 'dummy',
+    tokenId: 'dummy',
+    price: 'dummy',
+    owner: 'dummy',
+    seller: 'dummy',
+    tokenURI: 'dummy',
+  };
+  const [selectedNFT, setSelectedNFT] = useState<NFTDetailHeader>(dummydata);
   const [fetchNFTsClicked, setFetchNFTsClicked] = useState(false);
   const [showDetailPage, setShowDetailPage] = useState(false);
 
@@ -177,7 +209,7 @@ function NewObjectDialog({
 
   const handleAddToScene = () => {
     // Call the function to add the selected NFT to the scene
-    onInstallNFT(selectedNFT);
+    // onInstallNFT(selectedNFT);
   };
 
   const handleFetchMyNFTs = async () => {
@@ -248,14 +280,149 @@ function NewObjectDialog({
   // const fetchNAssets = useFetchNFTAssets();
   const showExtensionUpdateConfirmation = useExtensionUpdateAlertDialog();
 
+  // Gola-k URLChooser Start
+
+  const [inputValue, setInputValue] = React.useState('');
+  // const ResourceStoreChooser = ({
+  //   options,
+  //   onChooseResources,
+  //   createNewResource,
+  // }: ResourceStoreChooserProps) => {
+  //   return (
+  //     // Gola-Import: ResourceStore
+  //     <ResourceStore
+  //       onChoose={resource => {
+  //         const chosenResourceUrl = resource.url;
+  //         const newResource = createNewResource();
+  //         newResource.setFile(chosenResourceUrl);
+  //         const resourceCleanedName = isPublicAssetResourceUrl(
+  //           chosenResourceUrl
+  //         )
+  //           ? extractDecodedFilenameWithExtensionFromPublicAssetResourceUrl(
+  //               chosenResourceUrl
+  //             )
+  //           : path.basename(chosenResourceUrl);
+  //         newResource.setName(resourceCleanedName);
+  //         newResource.setOrigin('gdevelop-asset-store', chosenResourceUrl);
+
+  //         onChooseResources([newResource]);
+  //       }}
+  //       resourceKind={options.resourceKind}
+  //     />
+  //   );
+  // };
+
+  // const UrlChooser = ({
+  //   options,
+  //   onChooseResources,
+  //   createNewResource,
+  // }: ResourceStoreChooserProps) => {
+  //   // const [inputValue, setInputValue] = React.useState('');
+  //   const inputValue = { selectedNFT };
+  //   const [error, setError] = React.useState<?Error>(null);
+  //   const [
+  //     urlsErroredBooleanArray,
+  //     setUrlsErroredBooleanArray,
+  //   ] = React.useState<boolean[]>([]);
+  //   const hasErroredUrls = !!urlsErroredBooleanArray.filter(Boolean).length;
+
+  //   const validateInputValue = useDebounce(async (inputValue: string) => {
+  //     const urls = options.multiSelection
+  //       ? inputValue.split('\n').filter(Boolean)
+  //       : [inputValue];
+  //     setError(null);
+  //     setUrlsErroredBooleanArray([]);
+
+  //     try {
+  //       const responses = await Promise.all(
+  //         urls.map(async url => {
+  //           return await Axios.get(url, {
+  //             timeout: 1000,
+  //             validateStatus: status => true,
+  //           });
+  //         })
+  //       );
+
+  //       setUrlsErroredBooleanArray(
+  //         responses.map(
+  //           response => !(response.status >= 200 && response.status < 400)
+  //         )
+  //       );
+  //     } catch (error) {
+  //       setError(error);
+  //     }
+  //   }, 500);
+
+  //   React.useEffect(
+  //     () => {
+  //       validateInputValue(inputValue);
+  //     },
+  //     [inputValue, validateInputValue]
+  //   );
+
+  //   return (
+  //     <ColumnStackLayout noMargin expand>
+  //       <Line noMargin>
+  //         <TextFieldWithButtonLayout
+  //           renderButton={style => (
+  //             <RaisedButton
+  //               onClick={() => {
+  //                 const urls = options.multiSelection
+  //                   ? inputValue.split('\n').filter(Boolean)
+  //                   : [inputValue];
+
+  //                 onChooseResources(
+  //                   urls.map(url => {
+  //                     const newResource = createNewResource();
+  //                     newResource.setFile(url);
+  //                     newResource.setName(path.basename(url));
+  //                     newResource.setOrigin('url', url);
+
+  //                     return newResource;
+  //                   })
+  //                 );
+  //               }}
+  //               primary
+  //               label={<Trans>Choose</Trans>}
+  //               style={style}
+  //               disabled={!!error || hasErroredUrls}
+  //             />
+  //           )}
+  //         />
+  //       </Line>
+  //       <AlertMessage kind="warning">
+  //         <Trans>
+  //           The URLs must be public and stay accessible while you work on this
+  //           project - they won't be stored inside the project file. When
+  //           exporting a game, the resources pointed by these URLs will be
+  //           downloaded and stored inside the game.
+  //         </Trans>
+  //       </AlertMessage>
+  //     </ColumnStackLayout>
+  //   );
+  // };
+
+  // const browserResourceSources: Array<ResourceSource> = [
+  //   ...allResourceKindsAndMetadata.map(({ kind, createNewResource }) => ({
+  //     name: `url-chooser-${kind}`,
+  //     displayName: t`Use a public URL`,
+  //     displayTab: 'import-advanced',
+  //     kind,
+  //     renderComponent: (props: ResourceSourceComponentProps) => (
+  //       <UrlChooser
+  //         createNewResource={createNewResource}
+  //         onChooseResources={props.onChooseResources}
+  //         options={props.options}
+  //         key={`url-chooser-${kind}`}
+  //       />
+  //     ),
+  //   })),
+  // ];
+
   // Harpreet OnInstallNFT()
   const onInstallNFT = React.useCallback(
     async nft => {
       if (!nft) return false;
-
-
-      onCreateNewObject("Sprite")
-      return
 
       // const assets = [{
       //   name: nft.name,
@@ -264,21 +431,16 @@ function NewObjectDialog({
       // }];
       const external_url = 'https://gateway.pinata.cloud/';
       const assetURL = external_url + nft.image; // 'https://asset-resources.gdevelop.io/public-resources/16x16 Emotes by Tomcat94/8a1eb43ba55539012b4acf8b0b72985f4177e37eb3e26bb1b0b438609d29a7b4_Angry Emote Mid.png';
-      const assets = [
+      setInputValue(assetURL);
+      const assets: Array<Asset> = [
         {
           id: String(Number(nft.tokenId)),
           name: String(nft.name),
-          authors: ['Tomcat94'],
+          authors: [],
           license: 'CC0 (public domain)',
           shortDescription: '',
           description: String(nft.description),
-          tags: [
-            '16x16 emotes by tomcat94',
-            'side view',
-            'pixel art',
-            'emote',
-            'ui',
-          ],
+          tags: [],
           objectAssets: [
             {
               object: {
@@ -290,59 +452,15 @@ function NewObjectDialog({
                 variables: [],
                 effects: [],
                 behaviors: [],
-                customization: [],
                 animations: [
                   {
                     name: '',
                     useMultipleDirections: false,
-                    directions: [
-                      {
-                        looping: true,
-                        timeBetweenFrames: 0.025,
-                        sprites: [
-                          {
-                            hasCustomCollisionMask: true,
-                            image: String(nft.name),
-                            points: [],
-                            originPoint: {
-                              name: 'origine',
-                              x: 0,
-                              y: 0,
-                            },
-                            centerPoint: {
-                              automatic: true,
-                              name: 'centre',
-                              x: 0,
-                              y: 0,
-                            },
-                            customCollisionMask: [
-                              [
-                                {
-                                  x: 2,
-                                  y: 1,
-                                },
-                                {
-                                  x: 14,
-                                  y: 1,
-                                },
-                                {
-                                  x: 14,
-                                  y: 12,
-                                },
-                                {
-                                  x: 2,
-                                  y: 12,
-                                },
-                              ],
-                            ],
-                          },
-                        ],
-                      },
-                    ],
+                    directions: [],
                   },
                 ],
               },
-             
+              // customization: [],
               requiredExtensions: [],
               resources: [
                 {
@@ -408,8 +526,8 @@ function NewObjectDialog({
         sendAssetAddedToProject({
           id: asset.id,
           name: asset.name,
-          assetPackName: null,
-          assetPackTag: null,
+          assetPackName: asset.name,
+          assetPackTag: asset.tags[0],
           assetPackId: null,
           assetPackKind: 'public',
         });
@@ -436,6 +554,8 @@ function NewObjectDialog({
     ]
   );
 
+  // Gola-k URLChooser End
+
   const onInstallAsset = React.useCallback(
     async (assetShortHeader): Promise<boolean> => {
       if (!assetShortHeader) return false;
@@ -455,6 +575,11 @@ function NewObjectDialog({
           }
         }
         const assets = await fetchAssets([assetShortHeader]);
+
+        console.log(
+          '\n\n\n\n\\n%s\n\n\n\n\n',
+          JSON.stringify({ assets }, null, 2)
+        );
 
         console.log('assets in new dialog: ', assets);
         const asset = assets[0];
@@ -542,6 +667,7 @@ function NewObjectDialog({
         selectedCustomObjectEnumeratedMetadata.requiredExtensions;
       if (!selectedCustomObjectEnumeratedMetadata || !requiredExtensions)
         return;
+      console.log('hola');
       console.log(
         'selectedCustomObjectEnumeratedMetadata: ',
         selectedCustomObjectEnumeratedMetadata
@@ -784,10 +910,12 @@ function NewObjectDialog({
               <NFTDetailPage
                 nft={selectedNFT}
                 onClose={handleCloseDetailPage}
+                createNewResource={() => new gd.ImageResource()}
+                onChooseResources={action('onChooseResources')}
               />
             ) : fetchNFTsClicked ? (
               nfts.map(nft => (
-                <div key={nft.tokenId} onClick={() => handleNFTCardClick(nft)}>
+                <div key={nft.tokenId} onClick={() => {}}>
                   <NFTCard nft={nft} />
                 </div>
               ))
@@ -795,15 +923,15 @@ function NewObjectDialog({
               <p>Click "Fetch NFTs" to load NFTs</p>
             )}
 
-            {selectedNFT && (
+             {/* {
               <FlatButton
                 key="add-to-scene"
                 primary
                 label={<Trans>Add to Scene</Trans>}
                 onClick={handleAddToScene}
               />
-            )}
-
+            } */}
+  
             {/* Render My NFTs only if fetchMyNFTsClicked is true */}
 
             {fetchMyNFTsClicked

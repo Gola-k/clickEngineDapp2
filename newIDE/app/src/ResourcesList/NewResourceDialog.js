@@ -202,6 +202,7 @@ export const NewResourceDialog = ({
                 })}
               </React.Fragment>
             ))}
+            {/* console.log('hello2') */}
             {isShowingAdvanced &&
               importTabAdvancedResourceSources.map(source => (
                 <React.Fragment key={source.name}>
