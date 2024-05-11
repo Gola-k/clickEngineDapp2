@@ -3,7 +3,7 @@
 
 import React from 'react';
 
-const NFTDetailPage = ({ nft, onClose }) => {
+const NFTDetailPage = ({ nft, onClose, onAddToScene}) => {
   const external_url = 'https://gateway.pinata.cloud/';
   return (
     <div>
@@ -11,6 +11,7 @@ const NFTDetailPage = ({ nft, onClose }) => {
       <p>NFT Name: {nft.name}</p>
       <p>NFT Description: {nft.description}</p>
       <p>NFT Image: <img src={external_url + nft.image} alt={nft.name} /></p>
+      <button onClick={onAddToScene}>Add to Scene</button>
       <button onClick={onClose}>Close</button>
     </div>
   );

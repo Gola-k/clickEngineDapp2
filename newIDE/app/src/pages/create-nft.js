@@ -16,7 +16,6 @@ const CreateNFT = () => {
     NFTContext
   );
   // const history = useHistory();
-
   const onDrop = useCallback(
     async acceptedFile => {
       const url = await uploadToPinata(acceptedFile[0]);
