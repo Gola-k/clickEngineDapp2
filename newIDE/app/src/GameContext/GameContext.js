@@ -47,8 +47,10 @@ export const GameProvider = ({ children }) => {
   };
 
   const handleFileUpload = async file => {
+    console.log("---+++========>>>>>>>>>",file)
     const formData = new FormData();
     formData.append('file', file, file.name);
+    console.log("formData ======>>>>>>",formData)
     const subdomain = 'https://gateway.pinata.cloud';
 
     const JWT =
@@ -69,6 +71,7 @@ export const GameProvider = ({ children }) => {
       const url = `${subdomain}/ipfs/${response.data.IpfsHash}`;
       console.log('File URL:', url);
       setFileURL(url);
+      // console.log("file url ----->>>>>", url)
     } catch (error) {
       console.error('Error uploading file:', error.response.data);
     }
@@ -76,6 +79,7 @@ export const GameProvider = ({ children }) => {
 
   const handleImageUpload = async image => {
     const formData = new FormData();
+    // console.log("image=====>>>>>", image)
     formData.append('file', image, image.name);
     const subdomain = 'https://gateway.pinata.cloud';
 
@@ -100,6 +104,7 @@ export const GameProvider = ({ children }) => {
     } catch (error) {
       console.error('Error uploading image:', error.response.data);
     }
+  
   };
 
   const handleSubmit = async (formInput, accessID) => {

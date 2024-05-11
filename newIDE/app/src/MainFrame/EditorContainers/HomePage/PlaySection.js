@@ -48,6 +48,8 @@ const PlaySection = () => {
     });
   }, []);
 
+
+
   return (
     <SectionContainer
       title={<Trans>Play!</Trans>}

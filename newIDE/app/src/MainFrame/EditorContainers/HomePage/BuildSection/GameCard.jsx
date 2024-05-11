@@ -192,10 +192,34 @@ const GameCard = ({ nft }) => {
     }
   };
 
+
   const handlePlay = () => {
     // Open the preview of the game using the zip url, download the zip and use it to open the game
+    const url = {
+      url: nft.fileURL, // Assuming nft.fileURL contains the URL
+    };
+
+
+    const play = async ()=>{const response = await fetch('http://localhost:3001/play', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(url),
+    });
+  
+    if (!response.ok) {
+      throw new Error(`Error: ${response.status} - ${response.statusText}`);
+    }
+    }
+
+    play()
+    window.open("http://localhost:3003");
   };
 
+  console.log("nft --- gamecard ----  >>>", nft)
+
+  
   return (
     <div className="nft-card">
       <div className="image-container">
