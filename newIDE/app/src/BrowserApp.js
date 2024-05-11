@@ -30,7 +30,7 @@ import BrowserResourceFetcher from './ProjectsStorage/ResourceFetcher/BrowserRes
 import BrowserEventsFunctionsExtensionOpener from './EventsFunctionsExtensionsLoader/Storage/BrowserEventsFunctionsExtensionOpener';
 import BrowserEventsFunctionsExtensionWriter from './EventsFunctionsExtensionsLoader/Storage/BrowserEventsFunctionsExtensionWriter';
 import BrowserLoginProvider from './LoginProvider/BrowserLoginProvider';
-import { GameProvider } from './GameContext/GameContext'
+import { GameProvider } from './GameContext/GameContext';
 import { NFTProvider } from './context/NFTContext';
 
 export const create = (authentication: Authentication) => {
@@ -43,74 +43,74 @@ export const create = (authentication: Authentication) => {
 
   app = (
     <NFTProvider>
-    <GameProvider>
-      <Providers
-        authentication={authentication}
-        disableCheckForUpdates={!!appArguments['disable-update-check']}
-        makeEventsFunctionCodeWriter={makeBrowserS3EventsFunctionCodeWriter}
-        eventsFunctionsExtensionWriter={BrowserEventsFunctionsExtensionWriter}
-        eventsFunctionsExtensionOpener={BrowserEventsFunctionsExtensionOpener}
-      >
-        {({ i18n }) => (
-          <ProjectStorageProviders
-            appArguments={appArguments}
-            storageProviders={[
-              UrlStorageProvider,
-              CloudStorageProvider,
-              GoogleDriveStorageProvider,
-              DownloadFileStorageProvider,
-            ]}
-            defaultStorageProvider={UrlStorageProvider}
-          >
-            {({
-              getStorageProviderOperations,
-              getStorageProviderResourceOperations,
-              storageProviders,
-              initialFileMetadataToOpen,
-              getStorageProvider,
-            }) => (
-              <MainFrame
-                i18n={i18n}
-                renderPreviewLauncher={(props, ref) => (
-                  <BrowserS3PreviewLauncher {...props} ref={ref} />
-                )}
-                renderShareDialog={props => (
-                  <ShareDialog
-                    project={props.project}
-                    onSaveProject={props.onSaveProject}
-                    isSavingProject={props.isSavingProject}
-                    onChangeSubscription={props.onChangeSubscription}
-                    onClose={props.onClose}
-                    automatedExporters={browserAutomatedExporters}
-                    manualExporters={browserManualExporters}
-                    onlineWebExporter={browserOnlineWebExporter}
-                    allExportersRequireOnline
-                    fileMetadata={props.fileMetadata}
-                    storageProvider={props.storageProvider}
-                    initialTab={props.initialTab}
-                  />
-                )}
-                storageProviders={storageProviders}
-                resourceMover={BrowserResourceMover}
-                resourceFetcher={BrowserResourceFetcher}
-                getStorageProviderOperations={getStorageProviderOperations}
-                getStorageProviderResourceOperations={
-                  getStorageProviderResourceOperations
-                }
-                getStorageProvider={getStorageProvider}
-                resourceSources={browserResourceSources}
-                resourceExternalEditors={browserResourceExternalEditors}
-                extensionsLoader={makeExtensionsLoader({
-                  objectsEditorService: ObjectsEditorService,
-                  objectsRenderingService: ObjectsRenderingService,
-                  filterExamples: !Window.isDev(),
-                })}
-                initialFileMetadataToOpen={initialFileMetadataToOpen}
-              />
-            )}
-          </ProjectStorageProviders>
-        )}
-      </Providers>
+      <GameProvider>
+        <Providers
+          authentication={authentication}
+          disableCheckForUpdates={!!appArguments['disable-update-check']}
+          makeEventsFunctionCodeWriter={makeBrowserS3EventsFunctionCodeWriter}
+          eventsFunctionsExtensionWriter={BrowserEventsFunctionsExtensionWriter}
+          eventsFunctionsExtensionOpener={BrowserEventsFunctionsExtensionOpener}
+        >
+          {({ i18n }) => (
+            <ProjectStorageProviders
+              appArguments={appArguments}
+              storageProviders={[
+                UrlStorageProvider,
+                CloudStorageProvider,
+                GoogleDriveStorageProvider,
+                DownloadFileStorageProvider,
+              ]}
+              defaultStorageProvider={UrlStorageProvider}
+            >
+              {({
+                getStorageProviderOperations,
+                getStorageProviderResourceOperations,
+                storageProviders,
+                initialFileMetadataToOpen,
+                getStorageProvider,
+              }) => (
+                <MainFrame
+                  i18n={i18n}
+                  renderPreviewLauncher={(props, ref) => (
+                    <BrowserS3PreviewLauncher {...props} ref={ref} />
+                  )}
+                  renderShareDialog={props => (
+                    <ShareDialog
+                      project={props.project}
+                      onSaveProject={props.onSaveProject}
+                      isSavingProject={props.isSavingProject}
+                      onChangeSubscription={props.onChangeSubscription}
+                      onClose={props.onClose}
+                      automatedExporters={browserAutomatedExporters}
+                      manualExporters={browserManualExporters}
+                      onlineWebExporter={browserOnlineWebExporter}
+                      allExportersRequireOnline
+                      fileMetadata={props.fileMetadata}
+                      storageProvider={props.storageProvider}
+                      initialTab={props.initialTab}
+                    />
+                  )}
+                  storageProviders={storageProviders}
+                  resourceMover={BrowserResourceMover}
+                  resourceFetcher={BrowserResourceFetcher}
+                  getStorageProviderOperations={getStorageProviderOperations}
+                  getStorageProviderResourceOperations={
+                    getStorageProviderResourceOperations
+                  }
+                  getStorageProvider={getStorageProvider}
+                  resourceSources={browserResourceSources}
+                  resourceExternalEditors={browserResourceExternalEditors}
+                  extensionsLoader={makeExtensionsLoader({
+                    objectsEditorService: ObjectsEditorService,
+                    objectsRenderingService: ObjectsRenderingService,
+                    filterExamples: !Window.isDev(),
+                  })}
+                  initialFileMetadataToOpen={initialFileMetadataToOpen}
+                />
+              )}
+            </ProjectStorageProviders>
+          )}
+        </Providers>
       </GameProvider>
     </NFTProvider>
   );

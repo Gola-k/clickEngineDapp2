@@ -812,7 +812,7 @@ const MainFrame = (props: Props) => {
           console.error(
             `💣 Dangerous exceptions while loading ${
               dangerousLoadingResults.length
-            } JS extensions. 🔥 Please check these errors as they will CRASH GDevelop:`,
+            } JS extensions. 🔥 Please check these errors as they will CRASH ClickEngine:`,
             dangerousLoadingResults
           );
         }
@@ -1018,11 +1018,11 @@ const MainFrame = (props: Props) => {
 
         const answer = await showConfirmation({
           title: t`This project has an auto-saved version`,
-          message: t`GDevelop automatically saved a newer version of this project on ${new Date(
+          message: t`ClickEngine automatically saved a newer version of this project on ${new Date(
             autoSaveCreationDate
           ).toLocaleString()}. This new version might differ from the one that you manually saved. Which version would you like to open?`,
           dismissButtonLabel: t`My manual save`,
-          confirmButtonLabel: t`GDevelop auto-save`,
+          confirmButtonLabel: t`ClickEngine auto-save`,
         });
 
         if (!answer) return fileMetadata;
@@ -1042,7 +1042,7 @@ const MainFrame = (props: Props) => {
 
         const answer = await showConfirmation({
           title: t`This project cannot be opened`,
-          message: t`The project file appears to be corrupted, but an autosave file exists (backup made automatically by GDevelop on ${new Date(
+          message: t`The project file appears to be corrupted, but an autosave file exists (backup made automatically by ClickEngine on ${new Date(
             autoSaveCreationDate
           ).toLocaleString()}). Would you like to try to load it instead?`,
           confirmButtonLabel: t`Load autosave`,
