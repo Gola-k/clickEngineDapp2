@@ -56,7 +56,7 @@ const buildElectronMenuFromDeclarativeTemplate = (window, mainMenuTemplate) => {
  */
 const buildPlaceholderMainMenu = () => {
   const placeholderMenuItem = {
-    label: 'GDevelop is loading...',
+    label: 'ClickEngine is loading...',
     enabled: false,
   };
 
