@@ -766,20 +766,6 @@ function NewObjectDialog({
           disabled={isAssetBeingInstalled}
           id="add-asset-button"
         />
-      ) : isDev ? (
-        <RaisedButton
-          key="show-dev-assets"
-          label={
-            environment === 'staging' ? (
-              <Trans>Show live assets</Trans>
-            ) : (
-              <Trans>Show staging assets</Trans>
-            )
-          }
-          onClick={() => {
-            setEnvironment(environment === 'staging' ? 'live' : 'staging');
-          }}
-        />
       ) : null
     ) : currentTab === 'fetch-nft' ? (
       <FlatButton
@@ -816,157 +802,164 @@ function NewObjectDialog({
   );
 
   return (
-    <I18n>
-      {({ i18n }) => (
-        <>
-          <Dialog
-            title={<Trans>New object</Trans>}
-            secondaryActions={[
-              <HelpButton helpPagePath="/objects" key="help" />,
-            ]}
-            actions={[
-              <FlatButton
-                key="close"
-                label={<Trans>Close</Trans>}
-                primary={false}
-                onClick={handleClose}
-                id="close-button"
-              />,
-              <FlatButton
-                key="fetch-mynfts"
-                primary
-                label={<Trans>Fetch My NFTs</Trans>}
-                onClick={() => handleFetchMyNFTs()}
-              />,
-              mainAction,
-            ]}
-            onRequestClose={handleClose}
-            onApply={
-              openedAssetPack
-                ? () => setIsAssetPackDialogInstallOpen(true)
-                : openedAssetShortHeader
-                ? async () => {
-                    await onInstallAsset(openedAssetShortHeader);
-                  }
-                : undefined
-            }
-            open
-            flexBody
-            fullHeight
-            id="new-object-dialog"
-            fixedContent={
-              <Tabs
-                value={currentTab}
-                onChange={setCurrentTab}
-                options={[
-                  {
-                    label: <Trans>Asset Store</Trans>,
-                    value: 'asset-store',
-                    id: 'asset-store-tab',
-                  },
-                  {
-                    label: <Trans>New object and explore nft with Sprite</Trans>,
-                    value: 'new-object',
-                    id: 'new-object-from-scratch-tab',
-                  },
-                  {
-                    label: <Trans>Nft Card</Trans>,
-                    value: 'fetch-nft',
-                    id: 'nft-from-nft-tab',
-                  },
-                  //   {
-                  //     label: <Trans>Nft Card</Trans>,
-                  //     value: 'fetch-mynfts',
-                  //     id: 'nft-from-nft-tab',
-                  //   },
-                ]}
-                // Enforce scroll on mobile, because the tabs have long names.
-                variant={isMobile ? 'scrollable' : undefined}
-              />
-            }
-          >
-            {currentTab === 'asset-store' && (
-              <AssetStore ref={assetStore} hideGameTemplates />
-            )}
-            {currentTab === 'new-object' && (
-              <NewObjectFromScratch
-                onCreateNewObject={onCreateNewObject}
-                onCustomObjectSelected={
-                  setSelectedCustomObjectEnumeratedMetadata
-                }
-                selectedCustomObject={selectedCustomObjectEnumeratedMetadata}
-                onInstallAsset={async assetShortHeader => {
-                  const result = await onInstallAsset(assetShortHeader);
-                  if (result) {
-                    handleClose();
-                  }
-                }}
-                isAssetBeingInstalled={isAssetBeingInstalled}
-                project={project}
-                i18n={i18n}
-              />
-            )}
-            {showDetailPage ? (
-              <NFTDetailPage
-                nft={selectedNFT}
-                onClose={handleCloseDetailPage}
-                createNewResource={() => new gd.ImageResource()}
-                onChooseResources={action('onChooseResources')}
-              />
-            ) : fetchNFTsClicked ? (
-              nfts.map(nft => (
-                <div key={nft.tokenId} onClick={() => {}}>
-                  <NFTCard nft={nft} />
-                </div>
-              ))
-            ) : (
-              <p>Click "Fetch NFTs" to load NFTs</p>
-            )}
-
-             {/* {
-              <FlatButton
-                key="add-to-scene"
-                primary
-                label={<Trans>Add to Scene</Trans>}
-                onClick={handleAddToScene}
-              />
-            } */}
-  
-            {/* Render My NFTs only if fetchMyNFTsClicked is true */}
-
-            {fetchMyNFTsClicked
-              ? myNFTs.map(nft => (
-                  <div
-                    key={nft.tokenId}
-                    onClick={() => handleNFTCardClick(nft)}
+            <I18n>
+              {({ i18n }) => (
+                <>
+                  <Dialog
+                    title={<Trans>New object</Trans>}
+                    secondaryActions={[
+                      <HelpButton helpPagePath="/objects" key="help" />,
+                    ]}
+                    actions={[
+                      <FlatButton
+                        key="close"
+                        label={<Trans>Close</Trans>}
+                        primary={false}
+                        onClick={handleClose}
+                        id="close-button"
+                      />,
+                      currentTab === 'fetch-nft' && (
+                        <FlatButton
+                          key="fetch-mynfts"
+                          primary
+                          label={<Trans>Fetch My NFTs</Trans>}
+                          onClick={handleFetchMyNFTs}
+                        />
+                      ),
+                      mainAction,
+                    ]}
+                    onRequestClose={handleClose}
+                    onApply={
+                      openedAssetPack
+                        ? () => setIsAssetPackDialogInstallOpen(true)
+                        : openedAssetShortHeader
+                        ? async () => {
+                            await onInstallAsset(openedAssetShortHeader);
+                          }
+                        : undefined
+                    }
+                    open
+                    flexBody
+                    fullHeight
+                    id="new-object-dialog"
+                    fixedContent={
+                      <Tabs
+                        value={currentTab}
+                        onChange={setCurrentTab}
+                        options={[
+                          {
+                            label: <Trans>Asset Store</Trans>,
+                            value: 'asset-store',
+                            id: 'asset-store-tab',
+                          },
+                          {
+                            label: <Trans>New object from scratch</Trans>,
+                            value: 'new-object',
+                            id: 'new-object-from-scratch-tab',
+                          },
+                        ]}
+                        // Enforce scroll on mobile, because the tabs have long names.
+                        variant={isMobile ? 'scrollable' : undefined}
+                      >
+                        {currentTab === 'fetch-nft' && (
+                          <FlatButton
+                            primary
+                            label={<Trans>Fetch My NFTs</Trans>}
+                            onClick={handleFetchMyNFTs}
+                          />
+                        )}
+                      </Tabs>
+                    }
                   >
-                    <NFTCard nft={nft} onProfilePage={true} />
-                  </div>
-                ))
-              : null}
-          </Dialog>
-          {isAssetPackDialogInstallOpen &&
-            displayedAssetShortHeaders &&
-            openedAssetPack && (
-              <AssetPackInstallDialog
-                assetPack={openedAssetPack}
-                assetShortHeaders={displayedAssetShortHeaders}
-                addedAssetIds={existingAssetStoreIds}
-                onClose={() => setIsAssetPackDialogInstallOpen(false)}
-                onAssetsAdded={() => {
-                  setIsAssetPackDialogInstallOpen(false);
-                }}
-                project={project}
-                objectsContainer={objectsContainer}
-                onObjectsAddedFromAssets={onObjectsAddedFromAssets}
-                canInstallPrivateAsset={canInstallPrivateAsset}
-                resourceManagementProps={resourceManagementProps}
-              />
-            )}
-        </>
-      )}
-    </I18n>
-  );
+                    {currentTab === 'asset-store' && (
+                      <AssetStore ref={assetStore} hideGameTemplates />
+                    )}
+                    {currentTab === 'new-object' && (
+                      <NewObjectFromScratch
+                        onCreateNewObject={onCreateNewObject}
+                        onCustomObjectSelected={
+                          setSelectedCustomObjectEnumeratedMetadata
+                        }
+                        selectedCustomObject={selectedCustomObjectEnumeratedMetadata}
+                        onInstallAsset={async assetShortHeader => {
+                          const result = await onInstallAsset(assetShortHeader);
+                          if (result) {
+                            handleClose();
+                          }
+                        }}
+                        isAssetBeingInstalled={isAssetBeingInstalled}
+                        project={project}
+                        i18n={i18n}
+                      />
+                    )}
+                    {currentTab === 'fetch-nft' && (
+                      <div style={{ height: '100%', overflowY: 'auto' }}>
+                        {showDetailPage ? (
+                          <NFTDetailPage
+                            nft={selectedNFT}
+                            onClose={handleCloseDetailPage}
+                            onAddToScene={handleAddToScene} // Pass the callback to handle adding the NFT to the scene
+                          />
+                        ) : fetchNFTsClicked ? (
+                          <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+                            {nfts.map(nft => (
+                              <div
+                                key={nft.tokenId}
+                                onClick={() => handleNFTCardClick(nft)}
+                                style={{ flex: '0 0 auto', margin: '8px' }}
+                              >
+                                <NFTCard nft={nft} />
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p>Click "Fetch NFTs" to load NFTs</p>
+                        )}
+                        {/* {selectedNFT && (
+                          <FlatButton
+                            key="add-to-scene"
+                            primary
+                            label={<Trans>Add to Scene</Trans>}
+                            onClick={handleAddToScene}
+                          />
+                        )} */}
+                        {/* Render My NFTs only if fetchMyNFTsClicked is true */}
+                        {fetchMyNFTsClicked ? (
+                          myNFTs.map(nft => (
+                            <div
+                              key={nft.tokenId}
+                              onClick={() => handleNFTCardClick(nft)}
+                              style={{ flex: '0 0 auto', margin: '8px' }}
+                            >
+                              <NFTCard nft={nft} onProfilePage={true} />
+                            </div>
+                          ))
+                        ) : null}
+                      </div>
+                    )}
+                  </Dialog>
+                  {isAssetPackDialogInstallOpen &&
+                    displayedAssetShortHeaders &&
+                    openedAssetPack && (
+                      <AssetPackInstallDialog
+                        assetPack={openedAssetPack}
+                        assetShortHeaders={displayedAssetShortHeaders}
+                        addedAssetIds={existingAssetStoreIds}
+                        onClose={() => setIsAssetPackDialogInstallOpen(false)}
+                        onAssetsAdded={() => {
+                          setIsAssetPackDialogInstallOpen(false);
+                        }}
+                        project={project}
+                        objectsContainer={objectsContainer}
+                        onObjectsAddedFromAssets={onObjectsAddedFromAssets}
+                        canInstallPrivateAsset={canInstallPrivateAsset}
+                        resourceManagementProps={resourceManagementProps}
+                      />
+                    )}
+                </>
+              )}
+            </I18n>
+          );
 }
 
 const NewObjectDialogWithErrorBoundary = (props: Props) => (
