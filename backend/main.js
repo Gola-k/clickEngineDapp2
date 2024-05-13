@@ -70,8 +70,8 @@ function unzipFileAndStartServer(zipFilePath) {
   
       // Extract the contents of the zip file
       zip.extractAllTo(path.dirname(zipFilePath), true);
-  
-      exec(`npx serve downloads -l 3003`, (error, stdout, stderr) => {
+
+      setTimeout(exec(`npx serve downloads -l 3003`, (error, stdout, stderr) => {
         if (error) {
             console.error(`Error running npx serve: ${error.message}`);
             res.status(500).send('Internal server error');
@@ -79,7 +79,9 @@ function unzipFileAndStartServer(zipFilePath) {
         }
         console.log(`npx serve stdout: ${stdout}`);
         console.error(`npx serve stderr: ${stderr}`);
-        });
+        });,2000)
+  
+      
 
          // Resolve the promise
          resolve();

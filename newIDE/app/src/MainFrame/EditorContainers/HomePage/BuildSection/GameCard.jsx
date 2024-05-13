@@ -208,13 +208,23 @@ const GameCard = ({ nft }) => {
       body: JSON.stringify(url),
     });
   
-    if (!response.ok) {
-      throw new Error(`Error: ${response.status} - ${response.statusText}`);
-    }
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status} - ${response.statusText}`);
+      }
     }
 
+
     play()
-    window.open("http://localhost:3003");
+
+    async function waitTwoSeconds() {
+      await new Promise(resolve => setTimeout(resolve, 3000));
+    }
+    
+    (async () => {
+      await waitTwoSeconds();
+      window.open("http://localhost:3003")
+    })();
+    
   };
 
   console.log("nft --- gamecard ----  >>>", nft)
