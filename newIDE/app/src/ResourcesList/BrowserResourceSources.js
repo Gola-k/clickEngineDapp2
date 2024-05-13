@@ -215,7 +215,7 @@ export const MyNFTResources = ({
                     newResource.setName(path.basename(assetURL));
                     newResource.setOrigin('url', assetURL);
                     onChooseResources([newResource]);
-            }}> <NFTCard nft={nft}/></div>
+            }}> <NFTCard nft={nft} onProfilePage={true}/></div>
       ))}
     </ColumnStackLayout>
   );
