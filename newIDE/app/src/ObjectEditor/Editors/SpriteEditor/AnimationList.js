@@ -619,11 +619,11 @@ const AnimationList = React.forwardRef<
             imageResourceExternalEditors.length > 0 ? (
               <Column noMargin expand justifyContent="center">
                 <EmptyPlaceholder
-                  title={<Trans>Add your first animation</Trans>}
+                  title={<Trans>Add your first animation And Fetch NFT</Trans>}
                   description={
                     <Trans>Animations are a sequence of images.</Trans>
                   }
-                  actionLabel={<Trans>Import images</Trans>}
+                  actionLabel={<Trans>Import images And NFT </Trans>}
                   secondaryActionLabel={i18n._(
                     isMobile
                       ? t`Draw`

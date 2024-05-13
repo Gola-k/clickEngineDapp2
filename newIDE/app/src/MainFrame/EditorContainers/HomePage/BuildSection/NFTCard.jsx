@@ -25,6 +25,7 @@ const NFTCard = ({ nft, onProfilePage }) => {
   const handleBuy = async () => {
     await buyNFT(nft);
   };
+  console.log(nft)
 
   return (
     <div className="nft-card">
@@ -48,7 +49,11 @@ const NFTCard = ({ nft, onProfilePage }) => {
       </div>
       <div className="price">
         {/* Create a button to buy the NFT */}
-        <FlatButton label={<Trans>Buy</Trans>} onClick={handleBuy} />
+        {nft.seller === "0x0000000000000000000000000000000000000000" ?(
+          <FlatButton label={<Trans>Add to scene</Trans>} onClick={() => { }} />
+        ) : (
+          <FlatButton label={<Trans>Buy</Trans>} onClick={handleBuy} />
+        )}
       </div>
 
       {isLoadingNFT && (

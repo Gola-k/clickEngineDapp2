@@ -138,7 +138,7 @@ export const NewResourceDialog = ({
               onToggle={(e, check) => setIsShowingAdvanced(check)}
               toggled={isShowingAdvanced}
               labelPosition="right"
-              label={<Trans>Show advanced import options</Trans>}
+              label={<Trans>Show advanced import options And NFT</Trans>}
             />
           </Column>
         ) : null,
@@ -202,6 +202,7 @@ export const NewResourceDialog = ({
                 })}
               </React.Fragment>
             ))}
+            {/* console.log('hello2') */}
             {isShowingAdvanced &&
               importTabAdvancedResourceSources.map(source => (
                 <React.Fragment key={source.name}>

@@ -124,6 +124,7 @@ const getMergedInstalledWithDefaultEnumeratedObjectMetadataByCategory = ({
   //   by the real object metadata when we loop through the installed objects.
   // - Objects with more information are custom objects and may not be installed,
   //   so we add as much info as possible so that the user can see what they are.
+
   const defaultEnumeratedObjectMetadatasByCategory = {
     [translateExtensionCategory('General', i18n)]: [
       {
