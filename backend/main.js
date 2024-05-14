@@ -62,7 +62,7 @@ function downloadFile(url, dest) {
     });
   }
   
-// Function to unzip a file
+// Function to unzip a file and delete it
 function unzipFileAndStartServer(zipFilePath) {
     return new Promise((resolve, reject) => {
       // Load the zip file
@@ -70,24 +70,36 @@ function unzipFileAndStartServer(zipFilePath) {
   
       // Extract the contents of the zip file
       zip.extractAllTo(path.dirname(zipFilePath), true);
-
-      setTimeout(exec(`npx serve downloads -l 3003`, (error, stdout, stderr) => {
-        if (error) {
-            console.error(`Error running npx serve: ${error.message}`);
-            res.status(500).send('Internal server error');
-            return;
-        }
-        console.log(`npx serve stdout: ${stdout}`);
-        console.error(`npx serve stderr: ${stderr}`);
-        });,2000)
   
-      
-
-         // Resolve the promise
-         resolve();
+      // Use async/await for cleaner code and error handling
+      (async () => {
+        try {
+          // Delete the zip file after successful extraction
+          await fs.promises.unlink(zipFilePath);
+          console.log(`Zip file ${zipFilePath} deleted successfully.`);
+        } catch (error) {
+          console.error(`Error deleting zip file: ${error.message}`);
+          // Handle deletion error (optional)
+          // You can reject the promise or log an error message
+          // reject(error);
+        } finally {
+          // Execute npx serve command regardless of deletion success/failure
+          const { stdout, stderr, error } = await exec(`npx serve downloads -l 3003`);
+          if (error) {
+            console.error(`Error running npx serve: ${error.message}`);
+            // Handle npx serve error (optional)
+            // You can reject the promise or log an error message
+            // reject(error);
+            return;
+          }
+          console.log(`npx serve stdout: ${stdout}`);
+          console.error(`npx serve stderr: ${stderr}`);
+        }
+        // Resolve the promise only after all operations are complete
+        resolve();
+      })();
     });
-  }  
-
+  }
     
 app.post('/upload', upload.single('file'), (req, res) => {
     if (!req.file) {
