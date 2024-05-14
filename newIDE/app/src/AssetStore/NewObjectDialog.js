@@ -853,7 +853,7 @@ function NewObjectDialog({
                             id: 'asset-store-tab',
                           },
                           {
-                            label: <Trans>New object from scratch</Trans>,
+                            label: <Trans>New object And explore NFTs With Sprite</Trans>,
                             value: 'new-object',
                             id: 'new-object-from-scratch-tab',
                           },
@@ -908,7 +908,7 @@ function NewObjectDialog({
                                 onClick={() => handleNFTCardClick(nft)}
                                 style={{ flex: '0 0 auto', margin: '8px' }}
                               >
-                                <NFTCard nft={nft} />
+                                <NFTCard nft={nft} onProfilePage={false}/> 
                               </div>
                             ))}
                           </div>

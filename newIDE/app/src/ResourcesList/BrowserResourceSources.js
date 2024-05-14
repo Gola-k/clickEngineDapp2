@@ -269,7 +269,7 @@ const browserResourceSources: Array<ResourceSource> = [
   })),
    ...allResourceKindsAndMetadata.map(({ kind, createNewResource }) => ({
     name: `my-nft-${kind}`,
-    displayName: t`my-nft`,
+    displayName: t`MY NFT `,
     displayTab: 'import-advanced',
     kind,
     renderComponent: (props: ResourceSourceComponentProps) => (

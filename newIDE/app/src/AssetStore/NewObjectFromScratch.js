@@ -40,15 +40,17 @@ const ObjectListItem = ({
   const iconFilename = enumeratedObjectMetadata.iconFilename || '';
 
   return (
+    <>
     <ListItem
       id={id}
       leftIcon={<ListIcon src={iconFilename} iconSize={40} isGDevelopIcon />}
       key={enumeratedObjectMetadata.name}
-      primaryText={enumeratedObjectMetadata.fullName}
-      secondaryText={enumeratedObjectMetadata.description}
+      primaryText={enumeratedObjectMetadata.fullName === "Sprite" ? "Explore Sprite and NFTs" :enumeratedObjectMetadata.fullName}
+      secondaryText={enumeratedObjectMetadata.description === "Animated object which can be used for most elements of a game." ? "Animated object and import yous NFTs and Add to scene" :enumeratedObjectMetadata.description}
       secondaryTextLines={2}
       onClick={onClick}
     />
+    </>
   );
 };
 
