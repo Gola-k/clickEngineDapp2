@@ -26,7 +26,7 @@ const PlaySection = () => {
   const [showGameForm, setShowGameForm] = React.useState(false); // Add state for showing CreateNFT
   const { windowSize, isMobile, isLandscape } = useResponsiveWindowSize();
 
-  const { testing } = React.useContext(GameContext);
+  const { testing, boughtNFTs} = React.useContext(GameContext);
   const [nfts, setNfts] = React.useState([]);
   const [nftsCopy, setNftsCopy] = React.useState([]);
   const [isLoading, setIsLoading] = React.useState(true);
@@ -40,15 +40,26 @@ const PlaySection = () => {
     }
   });
 
+  // React.useEffect(() => {
+  //   testing().then(items => {
+  //     setNfts(items);
+  //     setNftsCopy(items);
+  //     setIsLoading(false);
+  //   });
+  // }, []);
+
   React.useEffect(() => {
     testing().then(items => {
       setNfts(items);
       setNftsCopy(items);
       setIsLoading(false);
     });
-  }, []);
 
-
+    // Reload the page when boughtNFTs state changes
+    if (boughtNFTs.length > 0) {
+      window.location.reload();
+    }
+  }, [boughtNFTs]);
 
   return (
     <SectionContainer
