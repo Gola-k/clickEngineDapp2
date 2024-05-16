@@ -26,7 +26,7 @@ const PlaySection = () => {
   const [showGameForm, setShowGameForm] = React.useState(false); // Add state for showing CreateNFT
   const { windowSize, isMobile, isLandscape } = useResponsiveWindowSize();
 
-  const { testing, boughtNFTs} = React.useContext(GameContext);
+  const { testing, boughtNFTs, isTransactionInProgress} = React.useContext(GameContext);
   const [nfts, setNfts] = React.useState([]);
   const [nftsCopy, setNftsCopy] = React.useState([]);
   const [isLoading, setIsLoading] = React.useState(true);
@@ -83,18 +83,16 @@ const PlaySection = () => {
       {/* Render CreateNFT conditionally */}
       {showGameForm && <GameNft />}
       <SectionRow expand>
-        {/* <iframe
-          src={'https://gd.games'}
-          title="gdgames"
-          style={{ ...styles.iframe, height: iframeHeight }}
-          scrolling="no" // This is deprecated, but this is the only way to disable the scrollbar.
-        /> */}
+      {(isLoading || isTransactionInProgress) && (
+          <PlaceHolderLoader />
+        )}
+        {!isLoading && !isTransactionInProgress && (
         <GridList>
           {nfts.map(nft => (
             <GameCard key={nft.tokenId} nft={nft} />
           ))}
         </GridList>
-        {/* {!iframeHeight && <PlaceHolderLoader />} */}
+      )}
       </SectionRow>
     </SectionContainer>
   );
