@@ -158,27 +158,14 @@ import Loader from './Loader';
 import './NFTCard.css';
 import { ethers } from 'ethers';
 
-const shortenAddress = address =>
-  `${address.slice(0, 5)}...${address.slice(address.length - 4)}`;
+const shortenAddress = address => `${address.slice(0, 5)}...${address.slice(address.length - 4)}`;
 
 const GameCard = ({ nft }) => {
-  const { nftCurrency, isLoadingNFT, buyNftWithaccessID } = useContext(
-    GameContext
-  );
+  const { nftCurrency, isLoadingNFT, buyNftWithaccessID } = useContext(GameContext);
   const [isBought, setIsBought] = useState(false);
-  const external_urls = 'https://gateway.pinata.cloud/';
-
-  // useEffect(
-  //   () => {
-  //     const checkIfBought = async () => {
-  //       const isNFTBought = await checkNFTBought(nft.id);
-  //       setIsBought(isNFTBought);
-  //     };
-
-  //     checkIfBought();
-  //   },
-  //   [nft.id]
-  // );
+  const [folderContentUrl, setFolderContentUrl] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const handleBuy = async () => {
     console.log('Clicked Buy button with accessId:', nft.accessId);
@@ -189,51 +176,64 @@ const GameCard = ({ nft }) => {
       setIsBought(true);
     } catch (error) {
       console.error('Error buying NFT:', error);
+      setError('Failed to buy the NFT. Please try again.');
     }
   };
 
-
-  const handlePlay = () => {
+  const handlePlay = async () => {
     // Open the preview of the game using the zip url, download the zip and use it to open the game
-    const url = {
-      url: nft.fileURL, // Assuming nft.fileURL contains the URL
-    };
+    const url = { url: nft.fileURL };// Assuming nft.fileURL contains the URL
+    setIsLoading(true);
+    setError(null);
 
+    try {
+      const response = await fetch('https://node.techsteck.com/play', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(url),
+      });
 
-    const play = async ()=>{const response = await fetch('http://localhost:3001/play', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(url),
-    });
-  
       if (!response.ok) {
         throw new Error(`Error: ${response.status} - ${response.statusText}`);
       }
+
+      const res = await response.text();
+      setFolderContentUrl(res);
+      setIsLoading(false);
+
+      // Wait until the folderContentUrl is set before opening the new window
+      if (res) {
+        const newWindow = window.open(res, '__blank');
+        const folderName = res.split('/').pop()
+        
+        const checkWindowClosed = setInterval(async () => {
+          if (newWindow.closed) {
+            clearInterval(checkWindowClosed);
+            // console.log("i was here")
+            await fetch('https://node.techsteck.com/delete-folder', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ folderName }),
+            });
+
+            // console.log("Now i am here")
+          }
+        }, 1000);
+      }
+      
+    } catch (err) {
+      console.error(err);
+      setError('Failed to play the game. Please try again.');
+      setIsLoading(false);
     }
-
-
-    play()
-
-    async function waitTwoSeconds() {
-      await new Promise(resolve => setTimeout(resolve, 3000));
-    }
-    
-    (async () => {
-      await waitTwoSeconds();
-      window.open("http://localhost:3003")
-    })();
-    
   };
 
-  console.log("nft --- gamecard ----  >>>", nft)
-
-  
   return (
     <div className="nft-card">
       <div className="image-container">
-        <img src={nft.imageURL} className="image" alt={`nft${nft.i}`} />
+        <img src={nft.imageURL} className="image" alt={`NFT ${nft.name}`} />
       </div>
       <div className="details">
         <p className="name">{nft.name}</p>
@@ -246,8 +246,7 @@ const GameCard = ({ nft }) => {
           </p>
         </div>
       </div>
-      <div className="price">
-        {/* Conditionally render button based on NFT ownership */}
+      <div className="action">
         {nft.isBought ? (
           <FlatButton label={<Trans>Play</Trans>} onClick={handlePlay} />
         ) : (
@@ -262,8 +261,13 @@ const GameCard = ({ nft }) => {
           </div>
         </div>
       )}
+
+      {isLoading && <p>Loading...</p>}
+      {error && <p className="error">{error}</p>}
     </div>
   );
 };
 
 export default GameCard;
+
+
