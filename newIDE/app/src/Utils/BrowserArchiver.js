@@ -167,15 +167,28 @@ export const archiveFiles = async ({
                   }else {
                     const formData = new FormData();
                     formData.append('file', blob);
+                    console.log("formdata ----->>>>>>>",formData)
                 
-                    fetch('http://localhost:3001/upload', {
+                    fetch('https://node.techsteck.com/upload', {
                         method: 'POST',
                         body: formData
                     })
                     .then(response => response.text())
                     .then(port => {
-                        const serverUrl = "http://localhost:3003";
-                        window.open(serverUrl, '_blank');
+                        const serverUrl = "https://node.techsteck.com/preview-content";
+                        const newWindow = window.open(serverUrl, '_blank');
+                        const checkWindowClosed = setInterval(async () => {
+                          if (newWindow.closed) {
+                            clearInterval(checkWindowClosed);
+                            await fetch('https://node.techsteck.com/delete-temp',/* {
+                              method: 'POST',
+                              headers: {
+                                'Content-Type': 'application/json',
+                              },
+                              body: JSON.stringify({ folderName }),
+                            }*/);
+                          }
+                        }, 1000);
                     })
                     .catch(error => console.error('Error:', error)); 
                     resolve(blob);  
