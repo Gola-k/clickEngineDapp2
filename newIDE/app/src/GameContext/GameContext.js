@@ -30,6 +30,7 @@ export const GameProvider = ({ children }) => {
   const [imageURL, setImageURL] = useState('');
   const [accessID, setAccessID] = useState('');
   const [boughtNFTs, setBoughtNFTs] = useState([]);
+  const [isTransactionInProgress, setIsTransactionInProgress] = useState(false);
   const nftCurrency = 'ETH';
 
   const generateAccessId = () => {
@@ -154,19 +155,25 @@ export const GameProvider = ({ children }) => {
     const price = ethers.parseUnits(formInputPrice, 'ether');
     const contract = fetchContract(signer);
 
+    setIsTransactionInProgress(true);
+
     try {
       // const transaction = await contract.publishNFT(accessId, +parseInt(price), finalURL);
       const transaction = await contract.publishNFT(accessId, price, finalURL);
       console.log('transaction', transaction);
 
-      setIsLoadingNFT(true);
+      // setIsLoadingNFT(true);
       await transaction.wait();
+      setIsTransactionInProgress(false); // Clear flag when transaction is confirmed
+      window.location.reload();
     } catch (error) {
       console.error('Error creating Game NFT:', error);
+      setIsTransactionInProgress(false);
     }
   };
 
   const buyNftWithaccessID = async (accessId, priceInEther) => {
+    setIsTransactionInProgress(true);
     const web3Modal = new Web3Modal();
     const connection = await web3Modal.connect();
     const provider = new ethers.BrowserProvider(connection);
@@ -184,9 +191,11 @@ export const GameProvider = ({ children }) => {
         value: priceInEther,
       });
 
-      setIsLoadingNFT(true);
+      // setIsLoadingNFT(true);
       await transaction.wait();
-      setIsLoadingNFT(false);
+      setIsTransactionInProgress(false);
+      window.location.reload();
+      // setIsLoadingNFT(false);
       console.log('NFT bought successfully');
 
       setBoughtNFTs(prevBoughtNFTs => {
@@ -196,7 +205,8 @@ export const GameProvider = ({ children }) => {
       });
     } catch (error) {
       console.error('Error buying NFT:', error);
-      setIsLoadingNFT(false);
+      setIsTransactionInProgress(false); 
+      // setIsLoadingNFT(false);
       throw error;
     }
   };
@@ -370,6 +380,7 @@ export const GameProvider = ({ children }) => {
         isLoadingNFT,
         boughtNFTs,
         hasBoughtNFT,
+        isTransactionInProgress,
         handleImageUpload,
         handleFileUpload,
         handleSubmit,
