@@ -24,6 +24,7 @@ import {
 import { NFTContext } from '../context/NFTContext';
 import useForceUpdate from '../Utils/UseForceUpdate';
 import NFTCard from '../MainFrame/EditorContainers/HomePage/BuildSection/NFTCard';
+
 type ResourceStoreChooserProps = {
   options: ChooseResourceOptions,
   onChooseResources: (resources: Array<gdResource>) => void,
@@ -47,7 +48,9 @@ const ResourceStoreChooser = ({
               chosenResourceUrl
             )
           : path.basename(chosenResourceUrl);
+          console.log(`this is resourceCleanedName`,chosenResourceUrl)
         newResource.setName(resourceCleanedName);
+        console.log(`this is resourceCleanedName`,resourceCleanedName)
         newResource.setOrigin('gdevelop-asset-store', chosenResourceUrl);
 
         onChooseResources([newResource]);
@@ -120,7 +123,6 @@ export const UrlChooser = ({
                     newResource.setFile(url);
                     newResource.setName(path.basename(url));
                     newResource.setOrigin('url', url);
-
                     return newResource;
                   })
                 );
@@ -182,41 +184,52 @@ export const UrlChooser = ({
   );
 };
 
-export const MyNFTResources = ({
+const MyNFTResources = ({
   options,
   onChooseResources,
   createNewResource,
 }: ResourceStoreChooserProps) => {
-    const forceUpdate = useForceUpdate()
-    const { fetchMyNFTs } = React.useContext(NFTContext);
-    const [nfts,setNfts] = React.useState([])
+  const forceUpdate = useForceUpdate();
+  const { fetchMyNFTs } = React.useContext(NFTContext);
+  const [nfts, setNfts] = React.useState([]);
 
-    React.useEffect(() => {
+  React.useEffect(() => {
     (async () => {
-        try {
-          const fetchedMyNFTs = await fetchMyNFTs('mynfts');
-          setNfts(fetchedMyNFTs);
-          console.log("My nfts", fetchedMyNFTs)
-          forceUpdate()
-        } catch (error) {
-          console.error('Error fetching my NFTs:', error);
-        }
-      })()
-    },[setNfts, fetchMyNFTs,forceUpdate])
+      try {
+        const fetchedMyNFTs = await fetchMyNFTs();
+        setNfts(fetchedMyNFTs);
+        console.log('My nfts', fetchedMyNFTs);
+        forceUpdate();
+      } catch (error) {
+        console.error('Error fetching my NFTs:', error);
+      }
+    })();
+  }, [setNfts, fetchMyNFTs, forceUpdate]);
 
   return (
     <ColumnStackLayout noMargin expand>
-      {nfts.map((nft) => (
-            <div key={ String(nft.tokenId)} onClick={() => {
-                    const external_url = 'https://gateway.pinata.cloud/';
-                    const assetURL = external_url + nft.image;
-                    const newResource = createNewResource();
-                    newResource.setFile(assetURL);
-                    newResource.setName(path.basename(assetURL));
-                    newResource.setOrigin('url', assetURL);
-                    onChooseResources([newResource]);
-            }}> <NFTCard nft={nft} onProfilePage={true}/></div>
+      <div  style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(215px, 1fr))',
+        gap: '16px'
+      }}>
+      {nfts.map(nft => (
+        <div
+          key={String(nft.tokenId)}
+          onClick={() => {
+            const external_url = 'https://gateway.pinata.cloud/';
+            const assetURL = external_url + nft.image;
+            const newResource = createNewResource();
+            newResource.setFile(assetURL);
+            newResource.setName(nft.name);
+            newResource.setOrigin('url', assetURL);
+            onChooseResources([newResource]);
+          }}
+        >
+          <NFTCard nft={nft} onProfilePage={true} />
+        </div>
       ))}
+      </div>
     </ColumnStackLayout>
   );
 };
@@ -239,20 +252,20 @@ const browserResourceSources: Array<ResourceSource> = [
       />
     ),
   })),
-  // ...allResourceKindsAndMetadata.map(({ kind, createNewResource }) => ({
-  //   name: `resource-store-${kind}`,
-  //   displayName: t`Choose from asset store`,
-  //   displayTab: 'standalone',
-  //   kind,
-  //   renderComponent: (props: ResourceSourceComponentProps) => (
-  //     <ResourceStoreChooser
-  //       createNewResource={createNewResource}
-  //       onChooseResources={props.onChooseResources}
-  //       options={props.options}
-  //       key={`resource-store-${kind}`}
-  //     />
-  //   ),
-  // })),
+  ...allResourceKindsAndMetadata.map(({ kind, createNewResource }) => ({
+    name: `resource-store-${kind}`,
+    displayName: t`Choose from asset store`,
+    displayTab: 'standalone',
+    kind,
+    renderComponent: (props: ResourceSourceComponentProps) => (
+      <ResourceStoreChooser
+        createNewResource={createNewResource}
+        onChooseResources={props.onChooseResources}
+        options={props.options}
+        key={`resource-store-${kind}`}
+      />
+    ),
+  })),
   ...allResourceKindsAndMetadata.map(({ kind, createNewResource }) => ({
     name: `url-chooser-${kind}`,
     displayName: t`Use a public URL`,

@@ -39,31 +39,10 @@ import PromisePool from '@supercharge/promise-pool';
 import NewObjectFromScratch from './NewObjectFromScratch';
 import { getAssetShortHeadersToDisplay } from './AssetsList';
 import ErrorBoundary from '../UI/ErrorBoundary';
-import NFTCard from '../MainFrame/EditorContainers/HomePage/BuildSection/NFTCard.jsx';
-import { NFTContext } from '../context/NFTContext';
-import { useState, useEffect } from 'react';
-import { action } from '@storybook/addon-actions';
-import NFTDetailPage from './NFTDetailPage.js';
-import {
-  type ChooseResourceOptions,
-  type ResourceSourceComponentProps,
-  type ResourceSource,
-  allResourceKindsAndMetadata,
-} from '../ResourcesList/ResourceSource';
-import { ResourceStore } from './ResourceStore/index.js';
-import path from 'path-browserify';
-import { useDebounce } from '../Utils/UseDebounce.js';
-import Axios from 'axios';
-import { type NFTDetailHeader } from './NFTDetailPage.js';
 
 const gd: libGDevelop = global.gd;
 const isDev = Window.isDev();
 
-type ResourceStoreChooserProps = {
-  options: ChooseResourceOptions,
-  onChooseResources: (resources: Array<gdResource>) => void,
-  createNewResource: () => gdResource,
-};
 
 export const useExtensionUpdateAlertDialog = () => {
   const { showConfirmation } = useAlertDialog();
@@ -120,30 +99,6 @@ export const useFetchAssets = () => {
   };
 };
 
-// export const useFetchNFTAssets = () => {
-//   const { environment } = React.useContext(AssetStoreContext);
-//   const { fetchMyNFTs} = React.useContext(NFTContext);
-
-//   return (
-//     async fetchMyNFTs().then((nfts) => {
-//     await PromisePool.withConcurrency(6)
-//       .for(nfts)
-//       .process(async nft => {
-//         const asset = isPrivateAsset(nft)
-//           ? await fetchPrivateAsset(nft, {
-//             environment,
-//           })
-//           : await getPublicAsset(nft, { environment });
-//         const json = await nft.image;
-//         json.image
-//         return asset;
-//       });
-//   }).catch((e)=>{
-//     throw new Error(e.errors[0].message)
-//     `there is an error with fetching my nft , ${e}`
-//   })
-// );
-// };
 
 type Props = {|
   project: gdProject,
@@ -167,62 +122,6 @@ function NewObjectDialog({
   canInstallPrivateAsset,
 }: Props) {
   const { isMobile } = useResponsiveWindowSize();
-  const { fetchNFTs, fetchMyNFTs } = React.useContext(NFTContext);
-  const [nfts, setNfts] = useState([]);
-  const [myNFTs, setMyNFTs] = useState([]);
-  const [fetchMyNFTsClicked, setFetchMyNFTsClicked] = useState(false);
-  const [fetchMyNFTsError, setFetchMyNFTsError] = useState(null);
-
-  const dummydata: NFTDetailHeader = {
-    name: 'dummy',
-    description: 'dummy',
-    image: 'dummy',
-    tokenId: 'dummy',
-    price: 'dummy',
-    owner: 'dummy',
-    seller: 'dummy',
-    tokenURI: 'dummy',
-  };
-  const [selectedNFT, setSelectedNFT] = useState<NFTDetailHeader>(dummydata);
-  const [fetchNFTsClicked, setFetchNFTsClicked] = useState(false);
-  const [showDetailPage, setShowDetailPage] = useState(false);
-
-  const handleFetchNFTs = async () => {
-    try {
-      const fetchedNFTs = await fetchNFTs();
-      setNfts(fetchedNFTs);
-      setFetchNFTsClicked(true);
-      setFetchMyNFTsClicked(false);
-    } catch (error) {
-      console.error('Error fetching NFTs:', error);
-    }
-  };
-
-  const handleCloseDetailPage = () => {
-    setShowDetailPage(false);
-  };
-
-  const handleNFTCardClick = nft => {
-    setSelectedNFT(nft);
-    setShowDetailPage(true);
-  };
-
-  const handleAddToScene = () => {
-    // Call the function to add the selected NFT to the scene
-    // onInstallNFT(selectedNFT);
-  };
-
-  const handleFetchMyNFTs = async () => {
-    try {
-      const fetchedMyNFTs = await fetchMyNFTs('mynfts');
-      setMyNFTs(fetchedMyNFTs);
-      setFetchMyNFTsClicked(true);
-      setFetchNFTsClicked(false);
-    } catch (error) {
-      console.error('Error fetching my NFTs:', error);
-    }
-  };
-
   const {
     setNewObjectDialogDefaultTab,
     getNewObjectDialogDefaultTab,
@@ -277,284 +176,7 @@ function NewObjectDialog({
   const { showAlert } = useAlertDialog();
 
   const fetchAssets = useFetchAssets();
-  // const fetchNAssets = useFetchNFTAssets();
   const showExtensionUpdateConfirmation = useExtensionUpdateAlertDialog();
-
-  // Gola-k URLChooser Start
-
-  const [inputValue, setInputValue] = React.useState('');
-  // const ResourceStoreChooser = ({
-  //   options,
-  //   onChooseResources,
-  //   createNewResource,
-  // }: ResourceStoreChooserProps) => {
-  //   return (
-  //     // Gola-Import: ResourceStore
-  //     <ResourceStore
-  //       onChoose={resource => {
-  //         const chosenResourceUrl = resource.url;
-  //         const newResource = createNewResource();
-  //         newResource.setFile(chosenResourceUrl);
-  //         const resourceCleanedName = isPublicAssetResourceUrl(
-  //           chosenResourceUrl
-  //         )
-  //           ? extractDecodedFilenameWithExtensionFromPublicAssetResourceUrl(
-  //               chosenResourceUrl
-  //             )
-  //           : path.basename(chosenResourceUrl);
-  //         newResource.setName(resourceCleanedName);
-  //         newResource.setOrigin('gdevelop-asset-store', chosenResourceUrl);
-
-  //         onChooseResources([newResource]);
-  //       }}
-  //       resourceKind={options.resourceKind}
-  //     />
-  //   );
-  // };
-
-  // const UrlChooser = ({
-  //   options,
-  //   onChooseResources,
-  //   createNewResource,
-  // }: ResourceStoreChooserProps) => {
-  //   // const [inputValue, setInputValue] = React.useState('');
-  //   const inputValue = { selectedNFT };
-  //   const [error, setError] = React.useState<?Error>(null);
-  //   const [
-  //     urlsErroredBooleanArray,
-  //     setUrlsErroredBooleanArray,
-  //   ] = React.useState<boolean[]>([]);
-  //   const hasErroredUrls = !!urlsErroredBooleanArray.filter(Boolean).length;
-
-  //   const validateInputValue = useDebounce(async (inputValue: string) => {
-  //     const urls = options.multiSelection
-  //       ? inputValue.split('\n').filter(Boolean)
-  //       : [inputValue];
-  //     setError(null);
-  //     setUrlsErroredBooleanArray([]);
-
-  //     try {
-  //       const responses = await Promise.all(
-  //         urls.map(async url => {
-  //           return await Axios.get(url, {
-  //             timeout: 1000,
-  //             validateStatus: status => true,
-  //           });
-  //         })
-  //       );
-
-  //       setUrlsErroredBooleanArray(
-  //         responses.map(
-  //           response => !(response.status >= 200 && response.status < 400)
-  //         )
-  //       );
-  //     } catch (error) {
-  //       setError(error);
-  //     }
-  //   }, 500);
-
-  //   React.useEffect(
-  //     () => {
-  //       validateInputValue(inputValue);
-  //     },
-  //     [inputValue, validateInputValue]
-  //   );
-
-  //   return (
-  //     <ColumnStackLayout noMargin expand>
-  //       <Line noMargin>
-  //         <TextFieldWithButtonLayout
-  //           renderButton={style => (
-  //             <RaisedButton
-  //               onClick={() => {
-  //                 const urls = options.multiSelection
-  //                   ? inputValue.split('\n').filter(Boolean)
-  //                   : [inputValue];
-
-  //                 onChooseResources(
-  //                   urls.map(url => {
-  //                     const newResource = createNewResource();
-  //                     newResource.setFile(url);
-  //                     newResource.setName(path.basename(url));
-  //                     newResource.setOrigin('url', url);
-
-  //                     return newResource;
-  //                   })
-  //                 );
-  //               }}
-  //               primary
-  //               label={<Trans>Choose</Trans>}
-  //               style={style}
-  //               disabled={!!error || hasErroredUrls}
-  //             />
-  //           )}
-  //         />
-  //       </Line>
-  //       <AlertMessage kind="warning">
-  //         <Trans>
-  //           The URLs must be public and stay accessible while you work on this
-  //           project - they won't be stored inside the project file. When
-  //           exporting a game, the resources pointed by these URLs will be
-  //           downloaded and stored inside the game.
-  //         </Trans>
-  //       </AlertMessage>
-  //     </ColumnStackLayout>
-  //   );
-  // };
-
-  // const browserResourceSources: Array<ResourceSource> = [
-  //   ...allResourceKindsAndMetadata.map(({ kind, createNewResource }) => ({
-  //     name: `url-chooser-${kind}`,
-  //     displayName: t`Use a public URL`,
-  //     displayTab: 'import-advanced',
-  //     kind,
-  //     renderComponent: (props: ResourceSourceComponentProps) => (
-  //       <UrlChooser
-  //         createNewResource={createNewResource}
-  //         onChooseResources={props.onChooseResources}
-  //         options={props.options}
-  //         key={`url-chooser-${kind}`}
-  //       />
-  //     ),
-  //   })),
-  // ];
-
-  // Harpreet OnInstallNFT()
-  const onInstallNFT = React.useCallback(
-    async nft => {
-      if (!nft) return false;
-
-      // const assets = [{
-      //   name: nft.name,
-      //   tokenId: nft.tokenId,
-      //   type:
-      // }];
-      const external_url = 'https://gateway.pinata.cloud/';
-      const assetURL = external_url + nft.image; // 'https://asset-resources.gdevelop.io/public-resources/16x16 Emotes by Tomcat94/8a1eb43ba55539012b4acf8b0b72985f4177e37eb3e26bb1b0b438609d29a7b4_Angry Emote Mid.png';
-      setInputValue(assetURL);
-      const assets: Array<Asset> = [
-        {
-          id: String(Number(nft.tokenId)),
-          name: String(nft.name),
-          authors: [],
-          license: 'CC0 (public domain)',
-          shortDescription: '',
-          description: String(nft.description),
-          tags: [],
-          objectAssets: [
-            {
-              object: {
-                adaptCollisionMaskAutomatically: true,
-                assetStoreId: '',
-                name: String(nft.name),
-                type: 'Sprite',
-                updateIfNotVisible: false,
-                variables: [],
-                effects: [],
-                behaviors: [],
-                animations: [
-                  {
-                    name: '',
-                    useMultipleDirections: false,
-                    directions: [],
-                  },
-                ],
-              },
-              // customization: [],
-              requiredExtensions: [],
-              resources: [
-                {
-                  alwaysLoaded: false,
-                  file: assetURL,
-                  kind: 'image',
-                  metadata: '',
-                  name: String(nft.name),
-                  smoothed: true,
-                  userAdded: false,
-                  origin: {
-                    name: 'gdevelop-asset-store',
-                    identifier: assetURL,
-                  },
-                },
-              ],
-            },
-          ],
-          gdevelopVersion: '5.0.0-beta100',
-          version: '1.0.0',
-          animationsCount: 1,
-          maxFramesCount: 1,
-          objectType: 'sprite',
-          previewImageUrls: [assetURL],
-          dominantColors: [16316664, 526344],
-          width: 16,
-          height: 16,
-        },
-      ];
-
-      setIsAssetBeingInstalled(true);
-
-      try {
-        const asset = assets[0];
-        const requiredExtensionInstallation = await checkRequiredExtensionsUpdateForAssets(
-          {
-            assets,
-            project,
-          }
-        );
-        const shouldUpdateExtension =
-          requiredExtensionInstallation.outOfDateExtensionShortHeaders.length >
-            0 &&
-          (await showExtensionUpdateConfirmation(
-            requiredExtensionInstallation.outOfDateExtensionShortHeaders
-          ));
-        await installRequiredExtensions({
-          requiredExtensionInstallation,
-          shouldUpdateExtension,
-          eventsFunctionsExtensionsState,
-          project,
-        });
-
-        const installOutput = await installPublicAsset({
-          asset,
-          project,
-          objectsContainer,
-        });
-        if (!installOutput) {
-          throw new Error('Unable to install private Asset.');
-        }
-
-        sendAssetAddedToProject({
-          id: asset.id,
-          name: asset.name,
-          assetPackName: asset.name,
-          assetPackTag: asset.tags[0],
-          assetPackId: null,
-          assetPackKind: 'public',
-        });
-
-        onObjectsAddedFromAssets(installOutput.createdObjects);
-
-        await resourceManagementProps.onFetchNewlyAddedResources();
-        setIsAssetBeingInstalled(false);
-        return true;
-      } catch (error) {
-        console.error('Error while installing the NFT:', error);
-        setIsAssetBeingInstalled(false);
-        return false;
-      }
-    },
-    [
-      setIsAssetBeingInstalled,
-      project,
-      showExtensionUpdateConfirmation,
-      eventsFunctionsExtensionsState,
-      objectsContainer,
-      resourceManagementProps,
-      onObjectsAddedFromAssets,
-    ]
-  );
-
-  // Gola-k URLChooser End
 
   const onInstallAsset = React.useCallback(
     async (assetShortHeader): Promise<boolean> => {
@@ -767,13 +389,6 @@ function NewObjectDialog({
           id="add-asset-button"
         />
       ) : null
-    ) : currentTab === 'fetch-nft' ? (
-      <FlatButton
-        key="fetch-nft"
-        primary
-        label={<Trans>Fetch NFTs</Trans>}
-        onClick={handleFetchNFTs}
-      />
     ) : !!selectedCustomObjectEnumeratedMetadata &&
       currentTab === 'new-object' ? (
       <RaisedButton
@@ -818,14 +433,6 @@ function NewObjectDialog({
                         onClick={handleClose}
                         id="close-button"
                       />,
-                      currentTab === 'fetch-nft' && (
-                        <FlatButton
-                          key="fetch-mynfts"
-                          primary
-                          label={<Trans>Fetch My NFTs</Trans>}
-                          onClick={handleFetchMyNFTs}
-                        />
-                      ),
                       mainAction,
                     ]}
                     onRequestClose={handleClose}
@@ -861,13 +468,6 @@ function NewObjectDialog({
                         // Enforce scroll on mobile, because the tabs have long names.
                         variant={isMobile ? 'scrollable' : undefined}
                       >
-                        {currentTab === 'fetch-nft' && (
-                          <FlatButton
-                            primary
-                            label={<Trans>Fetch My NFTs</Trans>}
-                            onClick={handleFetchMyNFTs}
-                          />
-                        )}
                       </Tabs>
                     }
                   >
@@ -892,51 +492,7 @@ function NewObjectDialog({
                         i18n={i18n}
                       />
                     )}
-                    {currentTab === 'fetch-nft' && (
-                      <div style={{ height: '100%', overflowY: 'auto' }}>
-                        {showDetailPage ? (
-                          <NFTDetailPage
-                            nft={selectedNFT}
-                            onClose={handleCloseDetailPage}
-                            onAddToScene={handleAddToScene} // Pass the callback to handle adding the NFT to the scene
-                          />
-                        ) : fetchNFTsClicked ? (
-                          <div style={{ display: 'flex', flexWrap: 'wrap' }}>
-                            {nfts.map(nft => (
-                              <div
-                                key={nft.tokenId}
-                                onClick={() => handleNFTCardClick(nft)}
-                                style={{ flex: '0 0 auto', margin: '8px' }}
-                              >
-                                <NFTCard nft={nft} onProfilePage={false}/> 
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <p>Click "Fetch NFTs" to load NFTs</p>
-                        )}
-                        {/* {selectedNFT && (
-                          <FlatButton
-                            key="add-to-scene"
-                            primary
-                            label={<Trans>Add to Scene</Trans>}
-                            onClick={handleAddToScene}
-                          />
-                        )} */}
-                        {/* Render My NFTs only if fetchMyNFTsClicked is true */}
-                        {fetchMyNFTsClicked ? (
-                          myNFTs.map(nft => (
-                            <div
-                              key={nft.tokenId}
-                              onClick={() => handleNFTCardClick(nft)}
-                              style={{ flex: '0 0 auto', margin: '8px' }}
-                            >
-                              <NFTCard nft={nft} onProfilePage={true} />
-                            </div>
-                          ))
-                        ) : null}
-                      </div>
-                    )}
+                  
                   </Dialog>
                   {isAssetPackDialogInstallOpen &&
                     displayedAssetShortHeaders &&
@@ -974,121 +530,4 @@ const NewObjectDialogWithErrorBoundary = (props: Props) => (
 
 export default NewObjectDialogWithErrorBoundary;
 
-/*
-\n{
-  "assets": [
-    {
-      "id": "743e83981b2af4e113baa2ed6e633cdc7ded4980ab75976d423393bd24adae1c",
-      "name": "Angry Emote Mid",
-      "authors": [
-        "Tomcat94"
-      ],
-      "license": "CC0 (public domain)",
-      "shortDescription": "",
-      "description": "",
-      "tags": [
-        "16x16 emotes by tomcat94",
-        "side view",
-        "pixel art",
-        "emote",
-        "ui"
-      ],
-      "objectAssets": [
-        {
-          "object": {
-            "adaptCollisionMaskAutomatically": true,
-            "assetStoreId": "",
-            "name": "Angry Emote Mid",
-            "type": "Sprite",
-            "updateIfNotVisible": false,
-            "variables": [],
-            "effects": [],
-            "behaviors": [],
-            "animations": [
-              {
-                "name": "",
-                "useMultipleDirections": false,
-                "directions": [
-                  {
-                    "looping": true,
-                    "timeBetweenFrames": 0.025,
-                    "sprites": [
-                      {
-                        "hasCustomCollisionMask": true,
-                        "image": "Angry Emote Mid.png",
-                        "points": [],
-                        "originPoint": {
-                          "name": "origine",
-                          "x": 0,
-                          "y": 0
-                        },
-                        "centerPoint": {
-                          "automatic": true,
-                          "name": "centre",
-                          "x": 0,
-                          "y": 0
-                        },
-                        "customCollisionMask": [
-                          [
-                            {
-                              "x": 2,
-                              "y": 1
-                            },
-                            {
-                              "x": 14,
-                              "y": 1
-                            },
-                            {
-                              "x": 14,
-                              "y": 12
-                            },
-                            {
-                              "x": 2,
-                              "y": 12
-                            }
-                          ]
-                        ]
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
-          },
-          "customization": [],
-          "requiredExtensions": [],
-          "resources": [
-            {
-              "alwaysLoaded": false,
-              "file": "https://asset-resources.gdevelop.io/public-resources/16x16 Emotes by Tomcat94/8a1eb43ba55539012b4acf8b0b72985f4177e37eb3e26bb1b0b438609d29a7b4_Angry Emote Mid.png",
-              "kind": "image",
-              "metadata": "",
-              "name": "Angry Emote Mid.png",
-              "smoothed": true,
-              "userAdded": false,
-              "origin": {
-                "name": "gdevelop-asset-store",
-                "identifier": "https://asset-resources.gdevelop.io/public-resources/16x16 Emotes by Tomcat94/8a1eb43ba55539012b4acf8b0b72985f4177e37eb3e26bb1b0b438609d29a7b4_Angry Emote Mid.png"
-              }
-            }
-          ]
-        }
-      ],
-      "gdevelopVersion": "5.0.0-beta100",
-      "version": "1.0.0",
-      "animationsCount": 1,
-      "maxFramesCount": 1,
-      "objectType": "sprite",
-      "previewImageUrls": [
-        "https://asset-resources.gdevelop.io/public-resources/16x16 Emotes by Tomcat94/8a1eb43ba55539012b4acf8b0b72985f4177e37eb3e26bb1b0b438609d29a7b4_Angry Emote Mid.png"
-      ],
-      "dominantColors": [
-        16316664,
-        526344
-      ],
-      "width": 16,
-      "height": 16
-    }
-  ]
-}
-*/
+
