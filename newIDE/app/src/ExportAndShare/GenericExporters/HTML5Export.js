@@ -69,7 +69,7 @@ export const ExportFlow = ({
       <RaisedButton
         label={
           !isExporting ? (
-            <Trans>Export as a HTML5 game</Trans>
+            <Trans>Preview and Export as a HTML5 game</Trans>
           ) : (
             <Trans>Exporting...</Trans>
           )

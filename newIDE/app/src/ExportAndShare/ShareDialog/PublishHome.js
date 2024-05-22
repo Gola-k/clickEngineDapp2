@@ -78,7 +78,7 @@ const styles = {
 const getSectionLabel = ({ section }: { section: ExporterSection }) => {
   switch (section) {
     case 'browser':
-      return <Trans>Browser</Trans>;
+      return <Trans>Browser And Preview</Trans>;
     case 'desktop':
       return <Trans>Desktop</Trans>;
     case 'android':
@@ -489,7 +489,7 @@ const PublishHome = ({
           />
           {!showOnlineWebExporterOnly && (
             <SectionLine
-              label={<Trans>HTML5 (external websites)</Trans>}
+              label={<Trans>HTML5  And Preview (external websites)</Trans>}
               icon={getSubSectionIcon('browser', 'offline')}
               description={<Trans>Itch.io, Poki, CrazyGames...</Trans>}
               onClick={() => onChooseSubSection('offline')}
