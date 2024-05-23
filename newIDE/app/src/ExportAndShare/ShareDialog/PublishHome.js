@@ -417,7 +417,7 @@ const PublishHome = ({
       )}
       {!chosenSection && (
         <ColumnStackLayout noMargin>
-          <SectionLine
+          {/* <SectionLine
             label={<Trans>gd.games</Trans>}
             icon={getSubSectionIcon('browser', 'online')}
             description={<Trans>Generate a shareable link to your game.</Trans>}
@@ -429,7 +429,7 @@ const PublishHome = ({
             highlighted
             disabled={!isOnline}
             id="publish-gd-games"
-          />
+          /> */}
           {!showOnlineWebExporterOnly && (
             <SectionLine
               label={getSectionLabel({ section: 'browser' })}

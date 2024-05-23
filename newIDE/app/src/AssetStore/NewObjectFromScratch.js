@@ -359,17 +359,17 @@ export default function NewObjectFromScratch({
     [project, i18n]
   );
 
-  const { DismissableTutorialMessage } = useDismissableTutorialMessage(
-    'intro-object-types'
-  );
+  // const { DismissableTutorialMessage } = useDismissableTutorialMessage(
+  //   'intro-object-types'
+  // );
 
   return !selectedCustomObject || !selectedCustomObject.assetStorePackTag ? (
     <ScrollView>
-      {DismissableTutorialMessage && (
+      {/* {DismissableTutorialMessage && (
         <Line>
           <Column expand>{DismissableTutorialMessage}</Column>
         </Line>
-      )}
+      )} */}
       <List>
         {Object.keys(enumeratedObjectMetadatasByCategory).map(category => {
           const categoryEnumeratedObjectMetadatas =
