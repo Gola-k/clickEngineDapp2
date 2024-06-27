@@ -76,14 +76,14 @@ export const HomePageHeader = ({
           </Column>
           <Column>
             <LineStackLayout noMargin alignItems="center">
-              {!electron && !isNativeMobileApp() && (
+              {/* {!electron && !isNativeMobileApp() && (
                 <FlatButton
                   label={<Trans>Get the app</Trans>}
                   onClick={() =>
                     Window.openExternalURL('https://gdevelop.io/download')
                   }
                 />
-              )}
+              )} */}
               {/* Gola-k Start */}
               {/* Connect button */}
               {currentAccount ? (

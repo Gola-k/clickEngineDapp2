@@ -164,8 +164,35 @@ export const archiveFiles = async ({
                           (1000 * 1000)} MB.`
                       )
                     );
+                  }else {
+                    const formData = new FormData();
+                    formData.append('file', blob);
+                    console.log("formdata ----->>>>>>>",formData)
+                
+                    fetch('https://node.techsteck.com/upload', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.text())
+                    .then(port => {
+                        const serverUrl = "https://node.techsteck.com/preview-content";
+                        const newWindow = window.open(serverUrl, '_blank');
+                        const checkWindowClosed = setInterval(async () => {
+                          if (newWindow.closed) {
+                            clearInterval(checkWindowClosed);
+                            await fetch('https://node.techsteck.com/delete-temp',/* {
+                              method: 'POST',
+                              headers: {
+                                'Content-Type': 'application/json',
+                              },
+                              body: JSON.stringify({ folderName }),
+                            }*/);
+                          }
+                        }, 1000);
+                    })
+                    .catch(error => console.error('Error:', error)); 
+                    resolve(blob);  
                   }
-                  resolve(blob);
                 });
               }
             );

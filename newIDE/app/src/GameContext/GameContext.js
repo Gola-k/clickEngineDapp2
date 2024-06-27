@@ -28,6 +28,9 @@ export const GameProvider = ({ children }) => {
   const [isLoadingNFT, setIsLoadingNFT] = useState(false);
   const [fileURL, setFileURL] = useState('');
   const [imageURL, setImageURL] = useState('');
+  const [accessID, setAccessID] = useState('');
+  const [boughtNFTs, setBoughtNFTs] = useState([]);
+  const [isTransactionInProgress, setIsTransactionInProgress] = useState(false);
   const nftCurrency = 'ETH';
 
   const generateAccessId = () => {
@@ -35,12 +38,20 @@ export const GameProvider = ({ children }) => {
     const randomPart = Math.random()
       .toString(36)
       .substring(7);
-    return `${timestamp}_${randomPart}`;
+    const ABC = `${timestamp}_${randomPart}`;
+    setAccessID(ABC);
+    return ABC;
+  };
+
+  const hasBoughtNFT = accessId => {
+    return boughtNFTs.includes(accessId);
   };
 
   const handleFileUpload = async file => {
+    console.log("---+++========>>>>>>>>>",file)
     const formData = new FormData();
     formData.append('file', file, file.name);
+    console.log("formData ======>>>>>>",formData)
     const subdomain = 'https://gateway.pinata.cloud';
 
     const JWT =
@@ -61,6 +72,7 @@ export const GameProvider = ({ children }) => {
       const url = `${subdomain}/ipfs/${response.data.IpfsHash}`;
       console.log('File URL:', url);
       setFileURL(url);
+      // console.log("file url ----->>>>>", url)
     } catch (error) {
       console.error('Error uploading file:', error.response.data);
     }
@@ -68,6 +80,7 @@ export const GameProvider = ({ children }) => {
 
   const handleImageUpload = async image => {
     const formData = new FormData();
+    // console.log("image=====>>>>>", image)
     formData.append('file', image, image.name);
     const subdomain = 'https://gateway.pinata.cloud';
 
@@ -92,10 +105,11 @@ export const GameProvider = ({ children }) => {
     } catch (error) {
       console.error('Error uploading image:', error.response.data);
     }
+  
   };
 
-  const handleSubmit = async formInput => {
-    const accessId = generateAccessId();
+  const handleSubmit = async (formInput, accessID) => {
+    // const accessId = await generateAccessId();
     // Handle form submission to Pinata IPFS
     // Combine finalImageURL, finalFileURL, name, and description into JSON object
     const { name, description, price } = formInput ?? {};
@@ -105,7 +119,7 @@ export const GameProvider = ({ children }) => {
       imageURL: imageURL,
       description: description,
       price: price,
-      accessId: accessId,
+      accessId: accessID,
     };
     // e.preventDefault();
     const subdomain = 'https://gateway.pinata.cloud';
@@ -123,7 +137,6 @@ export const GameProvider = ({ children }) => {
           },
         }
       );
-      console.log('accessid', accessId);
       const finalURL = `${subdomain}/ipfs/${response.data.IpfsHash}`;
       console.log('Final URL:', finalURL);
       return finalURL;
@@ -142,11 +155,222 @@ export const GameProvider = ({ children }) => {
     const price = ethers.parseUnits(formInputPrice, 'ether');
     const contract = fetchContract(signer);
 
-    // const transaction = await contract.publishNFT(accessId, +parseInt(price), finalURL);
-    const transaction = await contract.publishNFT(accessId, price, finalURL);
+    setIsTransactionInProgress(true);
 
+    try {
+      // const transaction = await contract.publishNFT(accessId, +parseInt(price), finalURL);
+      const transaction = await contract.publishNFT(accessId, price, finalURL);
+      console.log('transaction', transaction);
+
+      // setIsLoadingNFT(true);
+      await transaction.wait();
+      setIsTransactionInProgress(false); // Clear flag when transaction is confirmed
+      window.location.reload();
+    } catch (error) {
+      console.error('Error creating Game NFT:', error);
+      setIsTransactionInProgress(false);
+    }
+  };
+
+  const buyNftWithaccessID = async (accessId, priceInEther) => {
+    setIsTransactionInProgress(true);
+    const web3Modal = new Web3Modal();
+    const connection = await web3Modal.connect();
+    const provider = new ethers.BrowserProvider(connection);
+    const signer = await provider.getSigner();
+    const contract = fetchContract(signer);
+
+    try {
+      if (hasBoughtNFT(accessId)) {
+        throw new Error(
+          "Error: You can't buy this NFT because you already own it."
+        );
+      }
+
+      const transaction = await contract.buyNFT(accessId, {
+        value: priceInEther,
+      });
+
+      // setIsLoadingNFT(true);
+      await transaction.wait();
+      setIsTransactionInProgress(false);
+      window.location.reload();
+      // setIsLoadingNFT(false);
+      console.log('NFT bought successfully');
+
+      setBoughtNFTs(prevBoughtNFTs => {
+        const updatedBoughtNFTs = [...prevBoughtNFTs, accessId];
+        console.log('Updated boughtNFTs:', updatedBoughtNFTs);
+        return updatedBoughtNFTs;
+      });
+    } catch (error) {
+      console.error('Error buying NFT:', error);
+      setIsTransactionInProgress(false); 
+      // setIsLoadingNFT(false);
+      throw error;
+    }
+  };
+
+  const fetchMyBoughtNFTs = async () => {
+    try {
+      const web3Modal = new Web3Modal();
+      const connection = await web3Modal.connect();
+      const provider = new ethers.BrowserProvider(connection);
+      const signer = await provider.getSigner();
+      const contract = fetchContract(signer);
+
+      // Get the current connected account
+      const myAddress = await signer.getAddress();
+      console.log('myAddress: ', myAddress);
+
+      // Check if myAddress is a string
+      if (typeof myAddress !== 'string') {
+        console.error('Invalid address format.');
+        return [];
+      }
+
+      // Fetch bought NFTs for the connected account
+      const boughtNFTs = await contract.fetchMyBoughtNFTs();
+      // const boughtNFTs = [];
+      console.log('fetchMyBoughtNFTs', boughtNFTs);
+
+      // Initialize an array to store fetched NFTs
+      const myBoughtNFTs = [];
+
+      // Iterate over each bought NFT
+      for (let i = 0; i < boughtNFTs.length; i++) {
+        const nft = boughtNFTs[i];
+        const owner = nft[0];
+        const sellingPrice = nft[1];
+        const seller = nft[2];
+        const tokenId = nft[3];
+        const accessId = nft[4];
+
+        // Fetch additional metadata for the bought NFT
+        // const accessIdlist = await contract.getaccessIdslist();
+        // console.log('accessIdlist', accessIdlist);
+
+        const GametokenURI = await contract.getTokenURI(accessId, tokenId);
+        console.log('GametokenURI', GametokenURI);
+
+        const response = await axios.get(GametokenURI);
+        const { data } = response;
+        console.log('NFT metadata:', data);
+
+        const { name, fileURL, imageURL, description, price } = data;
+
+        // Construct the bought NFT object with metadata
+        myBoughtNFTs.push({
+          owner,
+          sellingPrice,
+          seller,
+          tokenId,
+          name,
+          fileURL,
+          imageURL,
+          description,
+          price,
+          accessId,
+          GametokenURI,
+        });
+      }
+
+      return myBoughtNFTs;
+    } catch (error) {
+      console.error('Error fetching bought NFTs:', error);
+      return [];
+    }
+  };
+
+  const fetchGameNFTs = async () => {
     setIsLoadingNFT(true);
-    await transaction.wait();
+
+    try {
+      const provider = new ethers.JsonRpcProvider(
+        'https://eth-sepolia.g.alchemy.com/v2/0Hy758w6BteirxoloAs_K_vgQhMZuCIc'
+      );
+
+      const contract = fetchContract(provider);
+
+      // Fetch last NFTs
+      const lastNFTs = await contract.fetchLastNFTs();
+      // const lastNFTs = {};
+      console.log('fetchGameItems data:', lastNFTs);
+
+      // Set to keep track of fetched combinations of accessId and tokenId
+      const fetchedCombinations = new Set();
+
+      // Array to store fetched NFTs
+      const nfts = [];
+
+      // Get the list of accessIds for this tokenId
+      const accessIdlist = await contract.getaccessIdslist();
+      console.log('accessIdlist', accessIdlist);
+
+      // Iterate over each fetched NFT
+      for (let i = 0; i < lastNFTs.length; i++) {
+        const nftProxy = lastNFTs[i];
+        const owner = nftProxy[0];
+        const sellingPrice = nftProxy[1];
+        const seller = nftProxy[2];
+        const tokenId = nftProxy[3];
+        const accessId = nftProxy[4];
+        const GametokenURI = await contract.getTokenURI(accessId, tokenId);
+        console.log('GametokenURI', GametokenURI);
+
+        const response = await axios.get(GametokenURI);
+        const { data } = response;
+        console.log('NFT metadata:', data);
+
+        const { name, fileURL, imageURL, description, price } = data;
+
+        nfts.push({
+          owner,
+          sellingPrice,
+          seller,
+          tokenId,
+          name,
+          fileURL,
+          imageURL,
+          description,
+          price,
+          accessId,
+          GametokenURI,
+        });
+      }
+      console.log('fetchedCombinations', fetchedCombinations);
+      console.log('nfts', nfts);
+
+      setIsLoadingNFT(false);
+      return nfts;
+    } catch (error) {
+      console.error('Error fetching NFTs:', error);
+      setIsLoadingNFT(false);
+      return [];
+    }
+  };
+
+  const mergeNFTs = (gameNFTs, myBoughtNFTs) => {
+    // Create a set of bought tokenIds for fast lookup
+    const boughtTokenIds = new Set(myBoughtNFTs.map(nft => nft.accessId));
+    console.log('boughtTokenIds', boughtTokenIds);
+
+    // Merge the arrays of NFTs
+    const mergedNFTs = gameNFTs.map(nft => ({
+      ...nft,
+      isBought: boughtTokenIds.has(nft.accessId), // Check if the tokenId is in the set
+    }));
+
+    return mergedNFTs;
+  };
+  const testing = async () => {
+    const gameNFTs = await fetchGameNFTs();
+    console.log('gameNFTs', gameNFTs);
+    const myBoughtNFTs = await fetchMyBoughtNFTs();
+    console.log('myBoughtNFTs', myBoughtNFTs);
+    const mergedNFTs = mergeNFTs(gameNFTs, myBoughtNFTs);
+    console.log('mergedNFTs', mergedNFTs);
+    return mergedNFTs;
   };
 
   return (
@@ -154,11 +378,18 @@ export const GameProvider = ({ children }) => {
       value={{
         nftCurrency,
         isLoadingNFT,
+        boughtNFTs,
+        hasBoughtNFT,
+        isTransactionInProgress,
         handleImageUpload,
         handleFileUpload,
         handleSubmit,
         createGameNft,
+        buyNftWithaccessID,
+        fetchMyBoughtNFTs,
+        fetchGameNFTs,
         generateAccessId,
+        testing,
       }}
     >
       {children}

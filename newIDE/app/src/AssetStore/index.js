@@ -54,6 +54,9 @@ import Text from '../UI/Text';
 import { capitalize } from 'lodash';
 import PrivateGameTemplateInformationPage from './PrivateGameTemplates/PrivateGameTemplateInformationPage';
 import { PrivateGameTemplateStoreContext } from './PrivateGameTemplates/PrivateGameTemplateStoreContext';
+import { GridList } from '@material-ui/core';
+import NFTCard from '../MainFrame/EditorContainers/HomePage/BuildSection/NFTCard';
+import { NFTContext } from '../context/NFTContext';
 
 type Props = {|
   hideGameTemplates?: boolean, // TODO: if we add more options, use an array instead.
@@ -548,9 +551,21 @@ export const AssetStore = React.forwardRef<Props, AssetStoreInterface>(
       ]
     );
 
+    const { fetchNFTs } = React.useContext(NFTContext);
+    const [nfts, setNfts] = React.useState([]);
+    const [nftsCopy, setNftsCopy] = React.useState([]);
+    const [isLoading, setIsLoading] = React.useState(true);
+    React.useEffect(() => {
+      fetchNFTs().then(items => {
+        setNfts(items);
+        setNftsCopy(items);
+        setIsLoading(false);
+      });
+    }, []);
+
     return (
       <Column expand noMargin useFullHeight noOverflowParent id="asset-store">
-        <LineStackLayout>
+        {/* <LineStackLayout>
           <IconButton
             id="home-button"
             key="back-discover"
@@ -602,9 +617,9 @@ export const AssetStore = React.forwardRef<Props, AssetStoreInterface>(
           >
             <Tune />
           </IconButton>
-        </LineStackLayout>
+        </LineStackLayout> */}
         <Spacer />
-        <Column noMargin>
+        {/* <Column noMargin>
           <Line justifyContent="space-between" noMargin alignItems="center">
             {(!isOnHomePage || !!openedShopCategory) && (
               <>
@@ -663,7 +678,7 @@ export const AssetStore = React.forwardRef<Props, AssetStoreInterface>(
               </>
             )}
           </Line>
-        </Column>
+        </Column> */}
         <Line
           expand
           noMargin
@@ -671,8 +686,22 @@ export const AssetStore = React.forwardRef<Props, AssetStoreInterface>(
             'hidden' /* Somehow required on Chrome/Firefox to avoid children growing (but not on Safari) */
           }
         >
+          <Spacer />
           {isOnHomePage ? (
-            storeError ? (
+            /* storeError ? ( */
+            !isOnHomePage ? (
+              console.error(
+                'An error occurred when fetching the store content. Please try again later.'
+              )
+            ) : /* <Line alignItems="center">
+                <GridList cols={5} style={{ width: '100%' }} cellHeight="auto">
+                  {nfts.map(nft => (
+                    <NFTCard key={nft.tokenId} nft={nft} />
+                  ))}
+                </GridList>
+              </Line> */
+
+            /* (
               <PlaceholderError onRetry={fetchAssetsAndGameTemplates}>
                 <AlertMessage kind="error">
                   <Trans>
@@ -681,16 +710,18 @@ export const AssetStore = React.forwardRef<Props, AssetStoreInterface>(
                   </Trans>
                 </AlertMessage>
               </PlaceholderError>
-            ) : publicAssetPacks &&
+            ) */
+
+            publicAssetPacks &&
               privateAssetPackListingDatas &&
               privateGameTemplateListingDatas ? (
               <AssetsHome
                 ref={assetsHome}
-                publicAssetPacks={publicAssetPacks}
-                privateAssetPackListingDatas={privateAssetPackListingDatas}
-                privateGameTemplateListingDatas={
-                  privateGameTemplateListingDatas
-                }
+                // publicAssetPacks={publicAssetPacks}
+                // privateAssetPackListingDatas={privateAssetPackListingDatas}
+                // privateGameTemplateListingDatas={
+                //   privateGameTemplateListingDatas
+                // }
                 onPublicAssetPackSelection={selectPublicAssetPack}
                 onPrivateAssetPackSelection={selectPrivateAssetPack}
                 onPrivateGameTemplateSelection={selectPrivateGameTemplate}
@@ -700,7 +731,21 @@ export const AssetStore = React.forwardRef<Props, AssetStoreInterface>(
                 displayPromotions={displayPromotions}
               />
             ) : (
-              <PlaceholderLoader />
+              <AssetsHome
+                ref={assetsHome}
+                // publicAssetPacks={publicAssetPacks}
+                // privateAssetPackListingDatas={privateAssetPackListingDatas}
+                // privateGameTemplateListingDatas={
+                //   privateGameTemplateListingDatas
+                // }
+                onPublicAssetPackSelection={selectPublicAssetPack}
+                onPrivateAssetPackSelection={selectPrivateAssetPack}
+                onPrivateGameTemplateSelection={selectPrivateGameTemplate}
+                onCategorySelection={selectShopCategory}
+                openedShopCategory={openedShopCategory}
+                hideGameTemplates={hideGameTemplates}
+                displayPromotions={displayPromotions}
+              />
             )
           ) : isOnSearchResultPage ? (
             <AssetsList
@@ -759,7 +804,7 @@ export const AssetStore = React.forwardRef<Props, AssetStoreInterface>(
               }
             />
           ) : null}
-          {canShowFiltersPanel && (
+          {/* {canShowFiltersPanel && (
             <ResponsivePaperOrDrawer
               onClose={() => setIsFiltersPanelOpen(false)}
               open={isFiltersPanelOpen}
@@ -780,7 +825,7 @@ export const AssetStore = React.forwardRef<Props, AssetStoreInterface>(
                 </Column>
               </ScrollView>
             </ResponsivePaperOrDrawer>
-          )}
+          )} */}
         </Line>
       </Column>
     );

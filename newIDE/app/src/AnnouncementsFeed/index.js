@@ -66,14 +66,15 @@ export const AnnouncementsFeed = ({
   const classesForClickableContainer = useStylesForClickableContainer();
 
   if (error) {
-    return (
-      <PlaceholderError onRetry={fetchAnnouncementsAndPromotions}>
-        <Trans>
-          Can't load the announcements. Verify your internet connection or try
-          again later.
-        </Trans>
-      </PlaceholderError>
-    );
+    // return (
+    //   <PlaceholderError onRetry={fetchAnnouncementsAndPromotions}>
+    //     <Trans>
+    //       Can't load the announcements. Verify your internet connection or try
+    //       again later.
+    //     </Trans>
+    //   </PlaceholderError>
+    // );
+    return hideLoader ? null : <PlaceholderLoader />;
   } else if (!announcements) {
     return hideLoader ? null : <PlaceholderLoader />;
   }

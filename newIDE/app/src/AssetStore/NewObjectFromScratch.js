@@ -40,15 +40,17 @@ const ObjectListItem = ({
   const iconFilename = enumeratedObjectMetadata.iconFilename || '';
 
   return (
+    <>
     <ListItem
       id={id}
       leftIcon={<ListIcon src={iconFilename} iconSize={40} isGDevelopIcon />}
       key={enumeratedObjectMetadata.name}
-      primaryText={enumeratedObjectMetadata.fullName}
-      secondaryText={enumeratedObjectMetadata.description}
+      primaryText={enumeratedObjectMetadata.fullName === "Sprite" ? "Explore Sprite and NFTs" :enumeratedObjectMetadata.fullName}
+      secondaryText={enumeratedObjectMetadata.description === "Animated object which can be used for most elements of a game." ? "Animated object and import yous NFTs and Add to scene" :enumeratedObjectMetadata.description}
       secondaryTextLines={2}
       onClick={onClick}
     />
+    </>
   );
 };
 
@@ -124,6 +126,7 @@ const getMergedInstalledWithDefaultEnumeratedObjectMetadataByCategory = ({
   //   by the real object metadata when we loop through the installed objects.
   // - Objects with more information are custom objects and may not be installed,
   //   so we add as much info as possible so that the user can see what they are.
+
   const defaultEnumeratedObjectMetadatasByCategory = {
     [translateExtensionCategory('General', i18n)]: [
       {
@@ -356,17 +359,17 @@ export default function NewObjectFromScratch({
     [project, i18n]
   );
 
-  const { DismissableTutorialMessage } = useDismissableTutorialMessage(
-    'intro-object-types'
-  );
+  // const { DismissableTutorialMessage } = useDismissableTutorialMessage(
+  //   'intro-object-types'
+  // );
 
   return !selectedCustomObject || !selectedCustomObject.assetStorePackTag ? (
     <ScrollView>
-      {DismissableTutorialMessage && (
+      {/* {DismissableTutorialMessage && (
         <Line>
           <Column expand>{DismissableTutorialMessage}</Column>
         </Line>
-      )}
+      )} */}
       <List>
         {Object.keys(enumeratedObjectMetadatasByCategory).map(category => {
           const categoryEnumeratedObjectMetadatas =

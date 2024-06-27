@@ -76,7 +76,7 @@ export const NewResourceDialog = ({
     return 'import';
   });
   const [hasChangedTabs, setHasChangedTabs] = React.useState(false);
-  const [isShowingAdvanced, setIsShowingAdvanced] = React.useState(false);
+  const [isShowingAdvanced, setIsShowingAdvanced] = React.useState(true);
 
   React.useEffect(
     () => {
@@ -120,46 +120,44 @@ export const NewResourceDialog = ({
   return (
     <Dialog
       title={<Trans>New resource</Trans>}
-      open
-      fullHeight
-      flexColumnBody
-      actions={[
-        <FlatButton
-          key="close"
-          label={<Trans>Close</Trans>}
-          primary
-          onClick={onClose}
-        />,
+  open
+  fullHeight
+  flexColumnBody
+  actions={[
+    <FlatButton
+      key="close"
+      label={<Trans>Close</Trans>}
+      primary
+      onClick={onClose}
+    />,
+  ]}
+  secondaryActions={[
+    <Column key="show-advanced-toggle">
+      <Toggle
+        onToggle={(e, check) => setIsShowingAdvanced(check)}
+        toggled={isShowingAdvanced}
+        labelPosition="right"
+        label={<Trans>Show advanced import options And NFT</Trans>}
+      />
+    </Column>,
+  ]}
+  onRequestClose={onClose}
+  fixedContent={
+    <Tabs
+      value={currentTab}
+      onChange={setCurrentTab}
+      options={[
+        ...standaloneTabResourceSources.map(({ name, displayName }) => ({
+          label: i18n._(displayName),
+          value: 'standalone-' + name,
+        })),
+        { label: <Trans>Choose a file</Trans>, value: 'import' },
       ]}
-      secondaryActions={[
-        importTabAdvancedResourceSources.length > 0 ? (
-          <Column key="show-advanced-toggle">
-            <Toggle
-              onToggle={(e, check) => setIsShowingAdvanced(check)}
-              toggled={isShowingAdvanced}
-              labelPosition="right"
-              label={<Trans>Show advanced import options</Trans>}
-            />
-          </Column>
-        ) : null,
-      ]}
-      onRequestClose={onClose}
-      fixedContent={
-        <Tabs
-          value={currentTab}
-          onChange={setCurrentTab}
-          options={[
-            ...standaloneTabResourceSources.map(({ name, displayName }) => ({
-              label: i18n._(displayName),
-              value: 'standalone-' + name,
-            })),
-            { label: <Trans>Choose a file</Trans>, value: 'import' },
-          ]}
-          // Enforce scroll on very small screens, because the tabs have long names.
-          variant={isMobile ? 'scrollable' : undefined}
-        />
-      }
-    >
+      // Enforce scroll on very small screens, because the tabs have long names.
+      variant={isMobile ? 'scrollable' : undefined}
+    />
+  }
+>
       {standaloneTabResourceSources.map(source => {
         if (currentTab !== 'standalone-' + source.name) return null;
 
@@ -202,6 +200,7 @@ export const NewResourceDialog = ({
                 })}
               </React.Fragment>
             ))}
+            {/* console.log('hello2') */}
             {isShowingAdvanced &&
               importTabAdvancedResourceSources.map(source => (
                 <React.Fragment key={source.name}>

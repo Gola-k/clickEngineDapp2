@@ -24,7 +24,7 @@ import { sendBehaviorsEditorShown } from '../Utils/Analytics/EventSender';
 import useDismissableTutorialMessage from '../Hints/useDismissableTutorialMessage';
 import useAlertDialog from '../UI/Alert/useAlertDialog';
 import ErrorBoundary from '../UI/ErrorBoundary';
-
+import { NFTContext } from '../context/NFTContext';
 const gd: libGDevelop = global.gd;
 
 export type ObjectEditorTab =
@@ -76,6 +76,7 @@ const InnerDialog = (props: InnerDialogProps) => {
     props.initialTab || 'properties'
   );
   const [objectName, setObjectName] = React.useState(props.objectName);
+  const { fetchNFTs, fetchMyNFTs } = React.useContext(NFTContext);
   const forceUpdate = useForceUpdate();
   const {
     onCancelChanges,
@@ -253,7 +254,6 @@ const InnerDialog = (props: InnerDialogProps) => {
                 translatableHintText={t`Object Name`}
                 onChange={newObjectName => {
                   if (newObjectName === objectName) return;
-
                   setObjectName(
                     props.getValidatedObjectOrGroupName(newObjectName)
                   );

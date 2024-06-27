@@ -10,10 +10,11 @@ contract GameMarketplace is ERC1155, ERC1155Holder {
 
     // Struct to represent each NFT
     struct NFT {
+        // put accessID
         address owner;
         uint256 sellingPrice;
         address payable seller;
-        uint256 mintedSupply;
+        uint256 tokenId;      
     }
 
     // Mapping from access ID to NFT details
@@ -22,11 +23,13 @@ contract GameMarketplace is ERC1155, ERC1155Holder {
     // Mapping from access ID to number of remaining NFTs
     mapping(string => uint256) public remainingNFTs;
 
-    // Mapping from access ID to mapping of token ID to owner's address
+    // Mapping from access ID and token ID to owner's address
     mapping(string => mapping(uint256 => address)) public ownersByAccessIdAndTokenId;
 
-    // Mapping from access ID and token ID to URI
+    // Mapping from access ID to mapping of token ID to URI
     mapping(string => mapping(uint256 => string)) public tokenURIs;
+
+    string[] internal accessIds;
 
     // Events
     event NFTPublished(string accessId, address indexed owner);
@@ -45,13 +48,13 @@ contract GameMarketplace is ERC1155, ERC1155Holder {
             ids[i] = i;
             values[i] = 1;
         }
-
         // Mint the NFTs for the given access ID
         _mintBatch(address(this), ids, values, "");
 
         // Update NFT details
-        nftsByAccessId[_accessId] = NFT(address(this), _sellingPrice, payable(msg.sender), MAX_SUPPLY);
+        nftsByAccessId[_accessId] = NFT(address(this), _sellingPrice, payable(msg.sender), 404);
         remainingNFTs[_accessId] = MAX_SUPPLY;
+        accessIds.push(_accessId);
 
         // Set the URI for the tokens
         setURIForAccessIdAndTokenId(_accessId, _tokenURI, ids);
@@ -77,8 +80,8 @@ contract GameMarketplace is ERC1155, ERC1155Holder {
         address payable seller = nftsByAccessId[_accessId].seller;
         seller.transfer(msg.value);
 
-        uint256 tokenId = MAX_SUPPLY - remainingNFTs[_accessId];
-        require(tokenId < MAX_SUPPLY, "All NFTs already sold");
+        uint256 tokenId = MAX_SUPPLY - remainingNFTs[_accessId] + 1;
+        require(tokenId <= MAX_SUPPLY, "All NFTs already sold");
 
         _safeTransferFrom(address(this), msg.sender, tokenId, 1, "");
         updateOwnerByAccessIdAndTokenId(_accessId, tokenId, msg.sender);
@@ -106,33 +109,63 @@ contract GameMarketplace is ERC1155, ERC1155Holder {
         return tokenURIs[_accessId][_tokenId];
     }
 
-    // // Fetching NFTs function
-    // function fetchNFTs(string memory _accessId) external view returns (NFT memory) {
-    //     return nftsByAccessId[_accessId];
-    // }
-
-    function fetchNFTs(string memory _accessId) external view returns (NFT[] memory, uint256) {
-    NFT[] memory nftsList = new NFT[](MAX_SUPPLY);
-    uint256 remainingCount = remainingNFTs[_accessId];
-
-    // Check if there are remaining NFTs for the access ID
-    if (remainingCount == 0) {
-        // If no NFTs remaining, return an empty list and a message
-        return (nftsList, 0);
-    }
-
-    // Iterate through all token IDs
-    for (uint256 i = 0; i < MAX_SUPPLY; i++) {
-        // Populate the NFT list with NFTs belonging to the access ID
-        if (ownersByAccessIdAndTokenId[_accessId][i] != address(0)) {
-            nftsList[i] = nftsByAccessId[_accessId];
+    // Fetching last NFTs function
+    function fetchLastNFTs() external view returns (NFT[] memory) {
+        NFT[] memory lastNFTs = new NFT[](accessIds.length);
+        
+        for (uint256 i = 0; i < accessIds.length; i++) {
+            string memory accessId = accessIds[i];
+            
+            if (remainingNFTs[accessId] > 0) {
+                uint256 tokenId = MAX_SUPPLY - remainingNFTs[accessId] + 1;
+                if (remainingNFTs[accessId] > 0 ) {
+                    lastNFTs[i] = nftsByAccessId[accessId];
+                    lastNFTs[i].tokenId = tokenId;
+                }
+            }
         }
+        
+        return lastNFTs;
     }
 
-    return (nftsList, remainingCount);
+    function fetchMyBoughtNFTs() external view returns (NFT[] memory) {
+        // Get the current connected account
+        address myAddress = msg.sender;
+
+        // Initialize an array to store fetched NFTs
+        NFT[] memory boughtNFTs = new NFT[](accessIds.length);
+
+        uint256 numOfBoughtNFTs = 0; // Counter for the number of bought NFTs
+
+        // Iterate through all access IDs
+        for (uint256 i = 0; i < accessIds.length; i++) {
+            string memory accessId = accessIds[i];
+            
+            // Iterate through all token IDs for the current access ID
+            for (uint256 j = 1; j <= MAX_SUPPLY; j++) {
+                // Check if the current token is owned by the caller
+                if (ownersByAccessIdAndTokenId[accessId][j] == myAddress) {
+                    // Populate the boughtNFTs array with the NFT details
+                    boughtNFTs[numOfBoughtNFTs] = nftsByAccessId[accessId];
+                    boughtNFTs[numOfBoughtNFTs].tokenId = j;
+                    numOfBoughtNFTs++; // Increment the counter for bought NFTs
+                }
+            }
+        }
+
+        // Resize the boughtNFTs array to the actual number of bought NFTs
+        assembly {
+            mstore(boughtNFTs, numOfBoughtNFTs)
+        }
+
+        return boughtNFTs;
     }
 
-    // Fetching remaining NFTs function
+    function getaccessIdslist() external view returns(string[] memory) {
+          return accessIds;
+    }
+
+    // Function to fetch remaining NFTs for a specific access ID
     function fetchRemainingNFTs(string memory _accessId) external view returns (uint256) {
         return remainingNFTs[_accessId];
     }
@@ -153,4 +186,4 @@ contract GameMarketplace is ERC1155, ERC1155Holder {
     }
 }
 
-// deployed on sepolia : 0x5FbDB2315678afecb367f032d93F642f64180aa3
+// sepolia - 0xcE20805eeC18D7c7c4355998651c4f89D3EA4479

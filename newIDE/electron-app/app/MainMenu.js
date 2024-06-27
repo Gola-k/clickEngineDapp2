@@ -56,7 +56,7 @@ const buildElectronMenuFromDeclarativeTemplate = (window, mainMenuTemplate) => {
  */
 const buildPlaceholderMainMenu = () => {
   const placeholderMenuItem = {
-    label: 'GDevelop is loading...',
+    label: 'ClickEngine is loading...',
     enabled: false,
   };
 
@@ -80,17 +80,17 @@ const buildPlaceholderMainMenu = () => {
     submenu: [{ role: 'minimize' }],
   };
 
-  const helpTemplate = {
-    role: 'help',
-    submenu: [placeholderMenuItem],
-  };
+  // const helpTemplate = {
+  //   role: 'help',
+  //   submenu: [placeholderMenuItem],
+  // };
 
   const template = [
     fileTemplate,
     editTemplate,
     viewTemplate,
     windowTemplate,
-    helpTemplate,
+    // helpTemplate,
   ];
 
   if (process.platform === 'darwin') {

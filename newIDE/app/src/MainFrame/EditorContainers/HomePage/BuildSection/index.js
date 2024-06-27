@@ -451,7 +451,7 @@ const BuildSection = ({
     </SectionContainer>
   ) : (
     <SectionContainer
-      title={<Trans>My projects</Trans>}
+      title={<Trans>Build projects</Trans>}
       showUrgentAnnouncements
       renderFooter={
         limits && hasTooManyCloudProjects
@@ -474,11 +474,11 @@ const BuildSection = ({
           : undefined
       }
     >
-      <SectionRow>
-        {/* {nfts.map(nft => (
+      {/* <SectionRow> */}
+      {/* {nfts.map(nft => (
           <NFTCard key={nft.tokenId} nft={nft} />
         ))} */}
-        <Carousel
+      {/* <Carousel
           title={<Trans>Ready-made games</Trans>}
           displayItemTitles={false}
           browseAllLabel={<Trans>Browse all templates</Trans>}
@@ -487,12 +487,12 @@ const BuildSection = ({
           browseAllIcon={<ChevronArrowRight fontSize="small" />}
           roundedImages
           displayArrowsOnDesktop
-        />
-        <Spacer />
-        <Column noMargin>
+        /> */}
+      {/* <Spacer /> */}
+      {/* <Column noMargin>
           <PromotionsSlideshow />
-        </Column>
-      </SectionRow>
+        </Column> */}
+      {/* </SectionRow> */}
       <SectionRow>
         <ResponsiveLineStackLayout
           justifyContent="space-between"
@@ -545,7 +545,9 @@ const BuildSection = ({
                   )
                 }
                 onClick={() => {
-                  setShowCreateNFT(true);
+                  showCreateNFT
+                    ? setShowCreateNFT(false)
+                    : setShowCreateNFT(true);
                 }}
                 icon={<Add fontSize="small" />}
                 id="home-create-asset-button"
@@ -671,7 +673,7 @@ const BuildSection = ({
         <Line alignItems="center" noMargin expand>
           <Column noMargin>
             <Text size="section-title">
-              <Trans>Start with a template</Trans>
+              <Trans>Start with buying an Asset</Trans>
             </Text>
           </Column>
         </Line>

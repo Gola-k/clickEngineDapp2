@@ -78,7 +78,7 @@ const styles = {
 const getSectionLabel = ({ section }: { section: ExporterSection }) => {
   switch (section) {
     case 'browser':
-      return <Trans>Browser</Trans>;
+      return <Trans>Browser And Preview</Trans>;
     case 'desktop':
       return <Trans>Desktop</Trans>;
     case 'android':
@@ -417,7 +417,7 @@ const PublishHome = ({
       )}
       {!chosenSection && (
         <ColumnStackLayout noMargin>
-          <SectionLine
+          {/* <SectionLine
             label={<Trans>gd.games</Trans>}
             icon={getSubSectionIcon('browser', 'online')}
             description={<Trans>Generate a shareable link to your game.</Trans>}
@@ -429,7 +429,7 @@ const PublishHome = ({
             highlighted
             disabled={!isOnline}
             id="publish-gd-games"
-          />
+          /> */}
           {!showOnlineWebExporterOnly && (
             <SectionLine
               label={getSectionLabel({ section: 'browser' })}
@@ -478,7 +478,7 @@ const PublishHome = ({
       )}
       {chosenSection === 'browser' && !chosenSubSection && (
         <ColumnStackLayout noMargin>
-          <SectionLine
+          {/* <SectionLine
             label={<Trans>gd.games</Trans>}
             icon={getSubSectionIcon('browser', 'online')}
             description={<Trans>Generate a shareable link to your game.</Trans>}
@@ -486,10 +486,10 @@ const PublishHome = ({
             highlighted
             disabled={!isOnline}
             id="publish-gd-games"
-          />
+          /> */}
           {!showOnlineWebExporterOnly && (
             <SectionLine
-              label={<Trans>HTML5 (external websites)</Trans>}
+              label={<Trans>HTML5  And Preview (external websites)</Trans>}
               icon={getSubSectionIcon('browser', 'offline')}
               description={<Trans>Itch.io, Poki, CrazyGames...</Trans>}
               onClick={() => onChooseSubSection('offline')}
